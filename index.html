@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wohnungs-Profi | 0-100% System</title>
+    <style>
+        :root {
+            --bg-color: #fdfbf7;
+            --pastel-red: #ffb3ba;
+            --pastel-red-dark: #d65c68;
+            --pastel-yellow: #ffffba;
+            --pastel-yellow-dark: #e8e854;
+            --pastel-green: #baffc9;
+            --pastel-green-dark: #5cad71;
+            --pastel-blue: #bae1ff;
+            --text-color: #4a4a4a;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* --- Header & Nav --- */
+        header {
+            background: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 { margin: 0; font-size: 1.4rem; color: #333; }
+        
+        nav {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: transform 0.1s;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        .btn-nav { background: var(--pastel-blue); color: #446688; }
+        .btn-nav.active { background: #88b3d6; color: white; }
+        
+        .btn-action { background: #4a4a4a; color: white; width: 100%; margin-top: 20px; padding: 15px; font-size: 1.1rem; }
+        .btn-edit { background: #fff3e0; color: #e65100; font-size: 0.85rem; padding: 6px 12px; margin-right: 5px; }
+        .btn-delete { background: var(--pastel-red); color: var(--pastel-red-dark); font-size: 0.85rem; padding: 6px 12px; }
+        .btn-test { background: #eee; color: #666; width: 100%; margin-top: 30px; border: 1px dashed #ccc;}
+
+        /* --- Mascots --- */
+        .mascot-area {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .mascot {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 5px;
+        }
+
+        .speech-bubble {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 10px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+            border-left: 5px solid var(--pastel-blue);
+            font-size: 0.95rem;
+        }
+
+        /* --- Layout --- */
+        .view-section {
+            display: none;
+            padding: 15px;
+            max-width: 700px;
+            margin: 0 auto;
+            padding-bottom: 80px;
+        }
+        .view-section.active { display: block; }
+
+        /* --- Forms & Inputs --- */
+        .form-section {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+        
+        .form-section h3 { margin-top: 0; margin-bottom: 10px; font-size: 1rem; color: #666; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .full-width { grid-column: span 2; }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            box-sizing: border-box; 
+        }
+
+        label { font-size: 0.8rem; color: #888; display: block; margin-bottom: 2px;}
+
+        /* --- Checkboxes --- */
+        .check-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .check-item:hover { border-color: #ddd; }
+        .check-item input { width: auto; margin-right: 10px; transform: scale(1.3); }
+
+        .b-red { border-left: 4px solid var(--pastel-red-dark); }
+        .b-yellow { border-left: 4px solid var(--pastel-yellow-dark); }
+        .b-green { border-left: 4px solid var(--pastel-green-dark); }
+
+        /* --- Cards --- */
+        .apt-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-left: 8px solid #ccc;
+        }
+        .status-GO { border-left-color: var(--pastel-green-dark); }
+        .status-STOP { border-left-color: var(--pastel-red-dark); }
+        .status-NEUTRAL { border-left-color: var(--pastel-yellow-dark); }
+
+        .apt-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;}
+        .apt-title { font-weight: bold; font-size: 1.2rem; }
+        .apt-meta { color: #666; font-size: 0.9rem; margin-bottom: 10px; display: flex; gap: 15px; flex-wrap: wrap;}
+        
+        .fact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+        .fact-item strong { display: block; color: #333; }
+        .fact-item { color: #666; }
+
+        .verdict-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* NEW SCORE VISUALIZATION */
+        .score-container {
+            margin-top: 15px;
+            background: #eee;
+            border-radius: 8px;
+            height: 25px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .score-bar {
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.5s ease;
+        }
+        .score-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 0;
+            line-height: 25px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 0 0 5px rgba(255,255,255,0.8);
+        }
+
+        .count-summary {
+            display: flex; gap: 5px; font-size: 0.8rem; margin-top: 5px; color: #666;
+        }
+
+        .action-links { margin-top: 15px; display: flex; gap: 10px; }
+        .link-btn { text-decoration: none; color: white; background: #88b3d6; padding: 6px 12px; border-radius: 4px; font-size: 0.9rem; }
+        svg { width: 100%; height: 100%; }
+        .config-list { list-style: none; padding: 0; }
+        .config-list li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🏡 Wohnungs-Profi</h1>
+    <nav>
+        <button onclick="switchView('list')" class="btn-nav active" id="nav-list">Meine Liste</button>
+        <button onclick="switchView('new')" class="btn-nav" id="nav-new">Neue Wohnung</button>
+        <button onclick="switchView('config')" class="btn-nav" id="nav-config">Kriterien</button>
+    </nav>
+</header>
+
+<div id="mascot-feedback" class="view-section active" style="padding-bottom: 0;">
+    <div class="mascot-area">
+        <div class="mascot" style="background:var(--pastel-green);">
+            <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="#fff" />
+                <path d="M30,40 Q20,20 40,30" fill="#d4a373" />
+                <path d="M70,40 Q80,20 60,30" fill="#d4a373" />
+                <circle cx="35" cy="45" r="5" fill="#333" />
+                <circle cx="65" cy="45" r="5" fill="#333" />
+                <ellipse cx="50" cy="55" rx="8" ry="6" fill="#333" />
+                <path d="M45,65 Q50,75 55,65" stroke="#333" stroke-width="2" fill="none"/>
+            </svg>
+        </div>
+        <div class="speech-bubble" id="speech-text">
+            Hallo! Lass uns dein perfektes Zuhause finden.
+        </div>
+        <div class="mascot" style="background:var(--pastel-red);">
+             <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="#fff" />
+                <path d="M25,25 L35,45 L45,25 Z" fill="#333" />
+                <path d="M55,25 L65,45 L75,25 Z" fill="#333" />
+                <path d="M30,30 Q50,90 70,30" fill="#333" />
+                <circle cx="40" cy="50" r="3" fill="#fff" />
+                <circle cx="60" cy="50" r="3" fill="#fff" />
+                <rect x="45" y="70" width="10" height="5" fill="#fff" />
+            </svg>
+        </div>
+    </div>
+</div>
+
+<div id="view-list" class="view-section active">
+    <div id="apartments-container"></div>
+    <div id="empty-state" style="text-align: center; color: #888; margin-top: 50px; display: none;">
+        Noch leer hier.<br>Klicke auf "Neue Wohnung"!
+    </div>
+</div>
+
+<div id="view-new" class="view-section">
+    <input type="hidden" id="edit-id" value="">
+    <div id="form-header" style="text-align:center; margin-bottom:20px; color:#888; font-weight:bold;">Neue Wohnung anlegen</div>
+
+    <div class="form-section">
+        <h3>📍 Wo & Wie groß?</h3>
+        <div class="form-grid">
+            <div class="full-width">
+                <label>Link zum Inserat (Optional)</label>
+                <input type="url" id="f-link" placeholder="www.immowelt.de/...">
+            </div>
+            <div class="full-width">
+                <label>Straße & Hausnummer</label>
+                <input type="text" id="f-street" placeholder="Musterstraße 12">
+            </div>
+            <div>
+                <label>PLZ</label>
+                <input type="text" id="f-zip" placeholder="12345">
+            </div>
+            <div>
+                <label>Stadt</label>
+                <input type="text" id="f-city" placeholder="Berlin">
+            </div>
+            <div>
+                <label>Größe (m²)</label>
+                <input type="number" id="f-size" placeholder="65">
+            </div>
+            <div>
+                <label>Zimmer</label>
+                <input type="number" id="f-rooms" placeholder="2.5">
+            </div>
+            <div>
+                <label>Etage</label>
+                <input type="text" id="f-floor" placeholder="3. OG">
+            </div>
+            <div>
+                <label>Frei ab</label>
+                <input type="text" id="f-date" placeholder="sofort">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section" style="border-left: 4px solid var(--pastel-yellow-dark);">
+        <h3>💶 Die Kosten (Monatlich)</h3>
+        <div class="form-grid">
+            <div>
+                <label>Kaltmiete (€)</label>
+                <input type="number" id="f-cold" placeholder="800">
+            </div>
+            <div>
+                <label>Nebenkosten (€)</label>
+                <input type="number" id="f-nk" placeholder="150">
+            </div>
+            <div>
+                <label>Heizkosten (€)</label>
+                <input type="number" id="f-heat" placeholder="inkl. oder extra">
+            </div>
+            <div>
+                <label><strong>Warmmiete (€)</strong></label>
+                <input type="number" id="f-warm" placeholder="950" style="font-weight:bold; background:#fffef0;">
+            </div>
+            <div class="full-width">
+                 <label>Kaution (Total €)</label>
+                 <input type="number" id="f-deposit" placeholder="2400">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>📞 Kontakt & Infos</h3>
+        <div class="form-grid">
+            <div>
+                <label>Kontakt Name</label>
+                <input type="text" id="f-contact-name" placeholder="Hr. Müller">
+            </div>
+            <div>
+                <label>Telefon / Email</label>
+                <input type="text" id="f-contact-info" placeholder="017...">
+            </div>
+            <div class="full-width">
+                <label>Sonstige Notizen</label>
+                <textarea id="f-notes" rows="3" placeholder="Baujahr, Energieausweis, Gefühl..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="evaluation-form"></div>
+
+    <button class="btn-action" onclick="calculateAndSave()">Speichern & Auswerten</button>
+    <button onclick="cancelEdit()" style="width:100%; margin-top:10px; background:transparent; color:#888;">Abbrechen</button>
+</div>
+
+<div id="view-config" class="view-section">
+    <div class="speech-bubble">Hier definierst du die "weichen" Faktoren für das Ampel-System.</div>
+    <div class="form-section b-red">
+        <h3>🔴 Red Lights (Dealbreaker)</h3>
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="input-red" placeholder="Neues Kriterium...">
+            <button onclick="addCriterion('red')" style="background:var(--pastel-red-dark); color:white;">+</button>
+        </div>
+        <ul id="list-red" class="config-list"></ul>
+    </div>
+    <div class="form-section b-yellow">
+        <h3>🟡 Yellow Lights (Naja...)</h3>
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="input-yellow" placeholder="Neues Kriterium...">
+            <button onclick="addCriterion('yellow')" style="background:var(--pastel-yellow-dark); color:black;">+</button>
+        </div>
+        <ul id="list-yellow" class="config-list"></ul>
+    </div>
+    <div class="form-section b-green">
+        <h3>🟢 Green Lights (Super!)</h3>
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="input-green" placeholder="Neues Kriterium...">
+            <button onclick="addCriterion('green')" style="background:var(--pastel-green-dark); color:white;">+</button>
+        </div>
+        <ul id="list-green" class="config-list"></ul>
+    </div>
+    <button class="btn-test" onclick="loadTestData()">🛠️ 2 Test-Inserate laden (Reset)</button>
+</div>
+
+<script>
+    // --- STATE MANAGEMENT ---
+    const defaultCriteria = {
+        red: ["Schimmel / Feuchtigkeit", "Miete über Budget", "Befristeter Vertrag"],
+        yellow: ["Kein Keller", "Erdgeschoss", "Renovierung nötig", "Verkehrslärm"],
+        green: ["Balkon / Terrasse", "Einbauküche inkl.", "Ruhige Lage", "Tageslichtbad"]
+    };
+
+    // TEST DATA (Adapted to new structure implicitly by counts)
+    const testApartments = [
+        {
+            id: 101,
+            facts: { street: "Sonnenallee 1", zip: "10115", city: "Berlin", size: "85", rooms: "3", floor: "4. OG", date: "2026-03-01", cold: "1200", warm: "1450", deposit: "3600", link: "", contactName: "Fr. Glück", contactInfo: "030 123456", notes: "Traumwohnung! Hell, Dielenboden." },
+            criteria: { red: [], yellow: [], green: ["Balkon", "Einbauküche", "Lage", "Bad"] },
+            counts: { r: 0, y: 0, g: 4 }, 
+            timestamp: new Date().toLocaleDateString()
+        }
+    ];
+
+    let criteria = JSON.parse(localStorage.getItem('myCriteriaV2')) || defaultCriteria;
+    let storedApts = localStorage.getItem('myApartmentsV2');
+    let apartments = storedApts ? JSON.parse(storedApts) : [...testApartments];
+
+    if (!storedApts) localStorage.setItem('myApartmentsV2', JSON.stringify(apartments));
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        renderConfigLists();
+        renderApartmentList();
+    });
+
+    // --- NAVIGATION ---
+    function switchView(viewName) {
+        document.querySelectorAll('.view-section').forEach(el => {
+            if(el.id !== 'mascot-feedback') el.classList.remove('active');
+        });
+        document.querySelectorAll('.btn-nav').forEach(el => el.classList.remove('active'));
+
+        document.getElementById('view-' + viewName).classList.add('active');
+        document.getElementById('nav-' + viewName).classList.add('active');
+
+        if(viewName === 'new') {
+            if(!document.getElementById('edit-id').value) {
+                resetForm();
+                setMascotText("Bello: Okay, alles auf Null. Erzähl mir von der Wohnung!");
+            }
+        } else if (viewName === 'list') {
+            renderApartmentList();
+            setMascotText("Fury: Hier ist deine Übersicht. Der Score zeigt dir die Qualität.");
+            document.getElementById('edit-id').value = "";
+        } else if (viewName === 'config') {
+            setMascotText("Bello: Hier kannst du einstellen, was wir suchen!");
+        }
+    }
+
+    function setMascotText(text) {
+        document.getElementById('speech-text').innerText = text;
+    }
+
+    // --- CONFIGURATION LOGIC ---
+    function renderConfigLists() {
+        ['red', 'yellow', 'green'].forEach(type => {
+            const listEl = document.getElementById('list-' + type);
+            listEl.innerHTML = '';
+            criteria[type].forEach((item, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${item}</span><button class="btn-delete" onclick="deleteCriterion('${type}', ${index})">✕</button>`;
+                listEl.appendChild(li);
+            });
+        });
+        localStorage.setItem('myCriteriaV2', JSON.stringify(criteria));
+    }
+
+    function addCriterion(type) {
+        const input = document.getElementById('input-' + type);
+        const val = input.value.trim();
+        if(val) {
+            criteria[type].push(val);
+            input.value = '';
+            renderConfigLists();
+        }
+    }
+
+    function deleteCriterion(type, index) {
+        criteria[type].splice(index, 1);
+        renderConfigLists();
+    }
+
+    // --- FORM MANAGEMENT ---
+    function resetForm() {
+        document.getElementById('edit-id').value = "";
+        document.getElementById('form-header').innerText = "Neue Wohnung anlegen";
+        document.querySelectorAll('#view-new input').forEach(i => { if(i.type !== "hidden") i.value = ''; });
+        document.getElementById('f-notes').value = '';
+        loadEvaluationForm([]);
+    }
+
+    function loadEvaluationForm(checkedItems = []) {
+        const container = document.getElementById('evaluation-form');
+        container.innerHTML = '';
+        const checkedSet = new Set(checkedItems || []);
+
+        const createSection = (title, type, items, cssClass) => {
+            if(items.length === 0) return;
+            const div = document.createElement('div');
+            div.className = `form-section ${cssClass}`;
+            div.innerHTML = `<h3>${title}</h3>`;
+            items.forEach(item => {
+                const isChecked = checkedSet.has(item) ? 'checked' : '';
+                const label = document.createElement('label');
+                label.className = 'check-item';
+                label.innerHTML = `<input type="checkbox" name="${type}" value="${item}" ${isChecked}> ${item}`;
+                div.appendChild(label);
+            });
+            container.appendChild(div);
+        };
+        createSection("🔴 Dealbreaker Check", "red", criteria.red, "b-red");
+        createSection("🟡 Nachteile Check", "yellow", criteria.yellow, "b-yellow");
+        createSection("🟢 Vorteile Check", "green", criteria.green, "b-green");
+    }
+
+    function editApartment(id) {
+        const apt = apartments.find(a => a.id === id);
+        if(!apt) return;
+
+        switchView('new');
+        document.getElementById('edit-id').value = apt.id;
+        document.getElementById('form-header').innerText = "Wohnung bearbeiten";
+        setMascotText("Fury: Wir korrigieren das. Sei präzise!");
+
+        const f = apt.facts;
+        document.getElementById('f-street').value = f.street;
+        document.getElementById('f-zip').value = f.zip;
+        document.getElementById('f-city').value = f.city;
+        document.getElementById('f-size').value = f.size;
+        document.getElementById('f-rooms').value = f.rooms;
+        document.getElementById('f-floor').value = f.floor;
+        document.getElementById('f-date').value = f.date;
+        document.getElementById('f-cold').value = f.cold;
+        document.getElementById('f-warm').value = f.warm;
+        document.getElementById('f-deposit').value = f.deposit;
+        document.getElementById('f-nk').value = f.nk || "";
+        document.getElementById('f-heat').value = f.heat || "";
+        document.getElementById('f-link').value = f.link;
+        document.getElementById('f-contact-name').value = f.contactName;
+        document.getElementById('f-contact-info').value = f.contactInfo;
+        document.getElementById('f-notes').value = f.notes;
+
+        let allChecked = [];
+        if(apt.criteria) {
+            allChecked = [...(apt.criteria.red||[]), ...(apt.criteria.yellow||[]), ...(apt.criteria.green||[])];
+        }
+        loadEvaluationForm(allChecked);
+    }
+
+    function cancelEdit() { switchView('list'); }
+
+    // --- SCORE CALCULATION ALGORITHM (0-100%) ---
+    function calculateScore(reds, yellows, greens) {
+        // RULE 1: Red Light = Instant 0
+        if (reds > 0) return 0;
+
+        // RULE 2: Base Score 50
+        // Green adds 10, Yellow subtracts 10
+        let score = 50 + (greens * 10) - (yellows * 10);
+
+        // RULE 3: Clamp between 0 and 100
+        if (score > 100) score = 100;
+        if (score < 0) score = 0;
+
+        return score;
+    }
+
+    function calculateAndSave() {
+        const editId = document.getElementById('edit-id').value;
+        const facts = {
+            street: document.getElementById('f-street').value || "Unbekannte Straße",
+            zip: document.getElementById('f-zip').value,
+            city: document.getElementById('f-city').value,
+            size: document.getElementById('f-size').value,
+            rooms: document.getElementById('f-rooms').value,
+            floor: document.getElementById('f-floor').value,
+            date: document.getElementById('f-date').value,
+            cold: document.getElementById('f-cold').value,
+            warm: document.getElementById('f-warm').value,
+            deposit: document.getElementById('f-deposit').value,
+            nk: document.getElementById('f-nk').value,
+            heat: document.getElementById('f-heat').value,
+            link: document.getElementById('f-link').value,
+            contactName: document.getElementById('f-contact-name').value,
+            contactInfo: document.getElementById('f-contact-info').value,
+            notes: document.getElementById('f-notes').value
+        };
+
+        const checkedRed = getCheckedValues('red');
+        const checkedYellow = getCheckedValues('yellow');
+        const checkedGreen = getCheckedValues('green');
+        const redsCount = checkedRed.length;
+
+        // Calculate Score implicitly on save, but mostly on render
+        // We just save counts and rebuild score dynamically
+        
+        let message = "Gespeichert!";
+        if(redsCount > 0) message = "Fury: Das ist ein K.O.! Score ist 0.";
+        else message = "Bello: Alles gespeichert! Schau dir den Score an.";
+
+        const aptData = {
+            id: editId ? parseInt(editId) : Date.now(),
+            facts: facts,
+            criteria: { red: checkedRed, yellow: checkedYellow, green: checkedGreen },
+            counts: { r: redsCount, y: checkedYellow.length, g: checkedGreen.length },
+            timestamp: new Date().toLocaleDateString()
+        };
+
+        if (editId) {
+            const index = apartments.findIndex(a => a.id == editId);
+            if(index !== -1) apartments[index] = aptData;
+        } else {
+            apartments.unshift(aptData);
+        }
+
+        localStorage.setItem('myApartmentsV2', JSON.stringify(apartments));
+        switchView('list');
+        setMascotText(message);
+    }
+
+    function getCheckedValues(name) {
+        return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+    }
+
+    // --- VERDICT & COLOR ---
+    function getVerdict(score, reds) {
+        if (reds > 0 || score === 0) return { text: "⛔️ K.O. / DURCHGEFALLEN", bg: "#ffebee", col: "#c62828", bar: "#c62828" };
+        if (score <= 40) return { text: "⚠️ RISIKOREICH (Zu viele Nachteile)", bg: "#fff3e0", col: "#e65100", bar: "#ff9800" };
+        if (score <= 60) return { text: "⚖️ DURCHSCHNITT (Okay)", bg: "#f5f5f5", col: "#616161", bar: "#9e9e9e" };
+        if (score <= 80) return { text: "👍 GUT (Empfehlung)", bg: "#e8f5e9", col: "#2e7d32", bar: "#4caf50" };
+        return { text: "🏆 TRAUMHAFT (Exzellent!)", bg: "#b9f6ca", col: "#1b5e20", bar: "#00c853" };
+    }
+
+    // --- RENDER ---
+    function renderApartmentList() {
+        const container = document.getElementById('apartments-container');
+        const emptyState = document.getElementById('empty-state');
+        container.innerHTML = '';
+
+        if(apartments.length === 0) {
+            emptyState.style.display = 'block';
+            return;
+        }
+        emptyState.style.display = 'none';
+
+        apartments.forEach(apt => {
+            // RE-CALCULATE SCORE ON RENDER (Fixes old data issues)
+            const score = calculateScore(apt.counts.r, apt.counts.y, apt.counts.g);
+
+            const card = document.createElement('div');
+            const verdict = getVerdict(score, apt.counts.r);
+            // Border color based on verdict
+            card.className = `apt-card`;
+            card.style.borderLeftColor = verdict.bar;
+
+            const f = apt.facts;
+            const fullAddress = `${f.street}, ${f.zip} ${f.city}`;
+            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
+            const contactStr = [f.contactName, f.contactInfo].filter(Boolean).join(' • ');
+
+            card.innerHTML = `
+                <div class="apt-header">
+                    <div>
+                        <div class="apt-title">${f.street}</div>
+                        <div style="font-size:0.9rem; color:#555;">${f.zip} ${f.city}</div>
+                    </div>
+                    <div>
+                        <button class="btn-edit" onclick="editApartment(${apt.id})">✏️</button>
+                        <button class="btn-delete" onclick="deleteApartment(${apt.id})">🗑️</button>
+                    </div>
+                </div>
+                <div class="apt-meta">
+                    ${f.rooms ? `<span>🚪 ${f.rooms} Zi.</span>` : ''}
+                    ${f.size ? `<span>📐 ${f.size} m²</span>` : ''}
+                    ${f.floor ? `<span>🏢 ${f.floor}</span>` : ''}
+                    ${f.date ? `<span>📅 ab ${f.date}</span>` : ''}
+                </div>
+                <div class="fact-grid">
+                    <div class="fact-item"><strong>Kalt</strong> ${f.cold ? f.cold + ' €' : '-'}</div>
+                    <div class="fact-item" style="color:#333; font-weight:bold; background:#fffeb0;"><strong>Warm</strong> ${f.warm ? f.warm + ' €' : '-'}</div>
+                    <div class="fact-item"><strong>Kaution</strong> ${f.deposit ? f.deposit + ' €' : '-'}</div>
+                </div>
+                ${contactStr ? `<div style="margin:10px 0; font-size:0.9rem;">📞 ${contactStr}</div>` : ''}
+                
+                <div class="score-container">
+                    <div class="score-bar" style="width: ${score}%; background: ${verdict.bar};"></div>
+                    <div class="score-text">${score}% Match</div>
+                </div>
+
+                <div class="verdict-box" style="background:${verdict.bg}; color:${verdict.col}; margin-top:5px;">
+                    ${verdict.text}
+                </div>
+
+                <div class="count-summary">
+                     <span>🟢 ${apt.counts.g} Wins</span> • 
+                     <span>🟡 ${apt.counts.y} Nachteile</span> • 
+                     <span>🔴 ${apt.counts.r} No-Gos</span>
+                </div>
+                
+                <div class="action-links">
+                    <a href="${mapUrl}" target="_blank" class="link-btn" style="background:#f0f0f0; color:#333;">📍 Karte</a>
+                    ${f.link ? `<a href="${f.link}" target="_blank" class="link-btn">🔗 Zum Inserat</a>` : ''}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function deleteApartment(id) {
+        if(confirm("Wirklich löschen?")) {
+            apartments = apartments.filter(a => a.id !== id);
+            localStorage.setItem('myApartmentsV2', JSON.stringify(apartments));
+            renderApartmentList();
+        }
+    }
+
+    function loadTestData() {
+        if(confirm("Dies lädt 2 Test-Inserate. Deine aktuelle Liste wird ergänzt.")) {
+            apartments.push(...testApartments);
+            localStorage.setItem('myApartmentsV2', JSON.stringify(apartments));
+            renderApartmentList();
+            switchView('list');
+            setMascotText("Bello: Ich habe dir zwei Beispiele in die Liste gepackt!");
+        }
+    }
+</script>
+</body>
+</html>
