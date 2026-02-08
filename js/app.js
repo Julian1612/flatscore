@@ -14,7 +14,10 @@ const phrases = {
         "Hey Julia, du machst das super! Wuff!",
         "Vergiss den Balkon nicht – wir brauchen frische Luft!",
         "Egal wie viele wir anschauen, wir geben nicht auf!",
-        "Ein Leckerli für dich, weil du so tapfer suchst! 🦴"
+        "Ein Leckerli für dich, weil du so tapfer suchst! 🦴",
+        "Wallah, ich schwöre, der nächste Hund der was auf Tauschwohnung hochlädt, bekommt von mir nen fetten Haufen Scheiße auf die Türmatte!",
+        "Sag mir welchen scheiß Kerl dir die Wohnung nicht gegeben hat, und bei Gott ich schöre dir, ich pinkel auf seine Türmatte!"
+
     ],
     cubi: [
         "Hüh! Julia, wir galoppieren direkt ins Glück!",
@@ -23,7 +26,9 @@ const phrases = {
         "Starke Nerven, Julia! Dein Traumstall wartet schon.",
         "Schnaub... lass dich nicht von Maklern ärgern.",
         "Positiv bleiben! Am Ende wird alles gut.",
-        "Wiehern! Auf in die nächste Runde!"
+        "Wiehern! Auf in die nächste Runde!", 
+        "Wenn ich den Erfinder von Tauschwohnung treffe, dem geb ich ne ordentliche Schelle! Wer so eine scheiße Seite macht, gehört bestraft! Und wenn ich den Typen treffe, der die Wohnung nicht gegeben hat, dem geb ich auch ne Schelle! Alle kriegen ne Schelle von mir, bis du deine Wohnung hast, Julia!",
+        "So eine scheiße Seite wie Tauschwohnung, kann nur ein Gottloser MANN erfunden haben!"
     ]
 };
 
