@@ -156,13 +156,17 @@
         <div class="card-title">📞 Kontakt & Gedanken</div>
         <div class="form-card glass-card">
             <div class="form-grid">
-                <div>
+                <div class="full-width">
                     <label>Name</label>
-                    <input type="text" id="f-contact-name" placeholder="Vermieter">
+                    <input type="text" id="f-contact-name" placeholder="Vermieter / Makler">
                 </div>
                 <div>
-                    <label>Kontakt</label>
-                    <input type="text" id="f-contact-info" placeholder="Tel/Mail">
+                    <label>Telefon</label>
+                    <input type="tel" id="f-contact-phone" placeholder="017...">
+                </div>
+                <div>
+                    <label>E-Mail</label>
+                    <input type="email" id="f-contact-email" placeholder="@">
                 </div>
                 <div class="full-width">
                     <label>Julias Notizen</label>
@@ -180,7 +184,7 @@
 
     <div id="view-config" class="view-section">
         <div class="speech-bubble-static">
-            Hier stellst du ein, wie streng wir bewerten.
+            Hier definierst du, was dein TraumNest braucht.
         </div>
 
         <div class="form-card glass-card" style="border-left: 5px solid var(--c-primary);">
@@ -259,7 +263,7 @@
     </div>
 </div>
 
-<div id="toast" class="toast">Nummer kopiert! 📋</div>
+<div id="toast" class="toast">Kopiert! 📋</div>
 
 </body>
 </html>

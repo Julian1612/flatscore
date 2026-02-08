@@ -5,7 +5,6 @@ const defaultCriteria = {
     green: ["Balkon / Terrasse", "Einbauküche inkl.", "Ruhige Lage", "Tageslichtbad"]
 };
 
-// Default Settings
 const defaultSettings = {
     budget: 0,
     useBudget: false
@@ -39,7 +38,8 @@ function generateId() { return Date.now() + Math.floor(Math.random() * 10000); }
 // Test Data
 const testDataTemplate = [
     {
-        facts: { street: "Sonnenallee 1", zip: "10115", city: "Berlin", size: "85", rooms: "3", floor: "4. OG", date: "2026-03-01", cold: "1200", warm: "1450", deposit: "3600", link: "", contactName: "Fr. Glück", contactInfo: "030 123456", notes: "Traumwohnung! Hell, Dielenboden. Fühlt sich gut an." },
+        facts: { street: "Sonnenallee 1", zip: "10115", city: "Berlin", size: "85", rooms: "3", floor: "4. OG", date: "2026-03-01", cold: "1200", warm: "1450", deposit: "3600", link: "", 
+        contactName: "Fr. Glück", contactPhone: "030 123456", contactEmail: "kontakt@wohnen.de", notes: "Traumwohnung! Hell, Dielenboden. Fühlt sich gut an." },
         criteria: { red: [], yellow: [], green: ["Balkon / Terrasse", "Einbauküche inkl.", "Ruhige Lage", "Tageslichtbad"] },
         counts: { r: 0, y: 0, g: 4 }, 
         timestamp: new Date().toLocaleDateString()
@@ -77,8 +77,6 @@ function saveConfig() {
     
     settings = { budget, useBudget };
     localStorage.setItem('mySettings', JSON.stringify(settings));
-    
-    // Recalculate everything since settings changed
     renderApartmentList();
 }
 
@@ -86,7 +84,9 @@ function saveConfig() {
 function mascotClick(name) {
     const list = phrases[name];
     const randomPhrase = list[Math.floor(Math.random() * list.length)];
-    setMascotText(`<b>${name === 'bello' ? 'Bello 🐶' : 'Cubi 🐴'}:</b> ${randomPhrase}`);
+    const displayName = name === 'bello' ? 'Bello 🐶' : 'Cubi 🐴';
+    setMascotText(`<b>${displayName}:</b> ${randomPhrase}`);
+    
     const selector = name === 'bello' ? '.mascot.dog' : '.mascot.horse';
     const el = document.querySelector(selector);
     if(el) {
@@ -132,7 +132,7 @@ function switchView(viewName) {
     }
 }
 
-// --- CONFIG LISTS ---
+// --- CONFIG LISTS (CHIPS) ---
 function renderConfigLists() {
     ['red', 'yellow', 'green'].forEach(type => {
         const listEl = document.getElementById('list-' + type);
@@ -185,14 +185,17 @@ function loadEvaluationForm(checkedItems = []) {
             input.type = 'checkbox';
             input.name = type;
             input.value = item;
+            
             if (checkedSet.has(item)) {
                 input.checked = true;
                 label.classList.add('selected');
             }
+            
             input.addEventListener('change', () => {
                 if(input.checked) label.classList.add('selected');
                 else label.classList.remove('selected');
             });
+
             label.appendChild(input);
             label.appendChild(document.createTextNode(item));
             div.appendChild(label);
@@ -207,17 +210,22 @@ function loadEvaluationForm(checkedItems = []) {
 function editApartment(id) {
     const apt = apartments.find(a => a.id === id);
     if(!apt) return;
+
     switchView('new');
     document.getElementById('edit-id').value = apt.id;
     setMascotText("Bello: Wir polieren das Inserat auf!");
+
     const f = apt.facts;
     const mapping = ['street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'];
     mapping.forEach(key => {
         const el = document.getElementById('f-' + key);
         if(el) el.value = f[key] || "";
     });
+    // New Fields
     document.getElementById('f-contact-name').value = f.contactName || "";
-    document.getElementById('f-contact-info').value = f.contactInfo || "";
+    document.getElementById('f-contact-phone').value = f.contactPhone || "";
+    document.getElementById('f-contact-email').value = f.contactEmail || "";
+
     let allChecked = [];
     if(apt.criteria) {
         allChecked = [...(apt.criteria.red||[]), ...(apt.criteria.yellow||[]), ...(apt.criteria.green||[])];
@@ -227,21 +235,18 @@ function editApartment(id) {
 
 function cancelEdit() { switchView('list'); }
 
-// --- SCORE LOGIC (Budget Included) ---
+// --- SCORE LOGIC ---
 function calculateScore(reds, yellows, greens, warmRent) {
     if (reds > 0) return 0;
     
     let score = 50 + (greens * 10) - (yellows * 10);
 
-    // Budget Calculation
     if (settings.useBudget && settings.budget > 0 && warmRent) {
         const diff = warmRent - settings.budget;
         if (diff > 0) {
-            // Penalty: -1 point per 10 EUR over budget
             const penalty = Math.ceil(diff / 10);
             score -= penalty;
         } else {
-            // Bonus: +5 points for staying in budget
             score += 5;
         }
     }
@@ -256,16 +261,16 @@ function calculateAndSave() {
     const facts = {};
     const mapping = ['street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'];
     mapping.forEach(key => facts[key] = document.getElementById('f-' + key).value);
+    
+    // Save New Fields
     facts.contactName = document.getElementById('f-contact-name').value;
-    facts.contactInfo = document.getElementById('f-contact-info').value;
+    facts.contactPhone = document.getElementById('f-contact-phone').value;
+    facts.contactEmail = document.getElementById('f-contact-email').value;
 
     const cRed = getChecked('red');
     const cYellow = getChecked('yellow');
     const cGreen = getChecked('green');
     
-    // Warm rent as number for calc
-    const warmRent = parseFloat(facts.warm) || 0;
-
     let message = "Gespeichert!";
     if(cRed.length > 0) message = "Fury schnaubt: Rote Flagge! Aber gut, dass wir es gesehen haben.";
     else if (cGreen.length > cYellow.length) message = "Bello bellt: Juhu! Das sieht nach einem Treffer aus, Julia!";
@@ -303,15 +308,12 @@ function getVerdict(score, reds) {
     return { text: "🏆 Traum", bg: "#e3f2fd", col: "#0984e3", bar: "#00e676" };
 }
 
-// --- CONTACT ACTIONS ---
-function openMail(mail) {
-    window.location.href = `mailto:${mail}`;
-}
-
-function copyPhone(phone) {
-    if(!phone) return;
-    navigator.clipboard.writeText(phone).then(() => {
+// --- COPY FEATURE ---
+function copyContent(text, label) {
+    if(!text) return;
+    navigator.clipboard.writeText(text).then(() => {
         const toast = document.getElementById('toast');
+        toast.innerText = `${label} kopiert! 📋`;
         toast.className = "toast show";
         setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
     });
@@ -319,6 +321,7 @@ function copyPhone(phone) {
 
 // --- RENDER LIST ---
 let currentFilter = 'all';
+
 function setFilter(type) {
     currentFilter = type;
     document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
@@ -364,18 +367,17 @@ function renderApartmentList() {
 
         const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(f.street + ' ' + f.zip + ' ' + f.city)}`;
         
-        // NOTES Display
         const notesHtml = f.notes ? `<div class="apt-notes"><strong>📝 Julias Notiz</strong>${f.notes}</div>` : '';
 
-        // CONTACT Display
+        // NEW CONTACT DISPLAY
         let contactHtml = '';
-        if (f.contactName || f.contactInfo) {
+        if (f.contactName || f.contactPhone || f.contactEmail) {
             contactHtml = `
             <div class="contact-row">
                 <div class="contact-name">👤 ${f.contactName || 'Kontakt'}</div>
                 <div class="contact-actions">
-                    ${f.contactInfo && f.contactInfo.includes('@') ? `<button class="btn-contact c-mail" onclick="openMail('${f.contactInfo}')">✉️</button>` : ''}
-                    ${f.contactInfo ? `<button class="btn-contact c-phone" onclick="copyPhone('${f.contactInfo}')">📞</button>` : ''}
+                    ${f.contactEmail ? `<button class="btn-contact c-mail" onclick="copyContent('${f.contactEmail}', 'Mail')">✉️</button>` : ''}
+                    ${f.contactPhone ? `<button class="btn-contact c-phone" onclick="copyContent('${f.contactPhone}', 'Nummer')">📞</button>` : ''}
                 </div>
             </div>`;
         }
