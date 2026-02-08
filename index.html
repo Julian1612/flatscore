@@ -44,7 +44,7 @@
             </div>
 
             <div class="speech-bubble">
-                <p id="speech-text">Tipp auf uns für gute Laune!</p>
+                <p id="speech-text">Hallo Julia! Suchen wir dein Nest?</p>
             </div>
 
             <div class="mascot-wrapper" onclick="mascotClick('cubi')">
@@ -180,11 +180,28 @@
 
     <div id="view-config" class="view-section">
         <div class="speech-bubble-static">
-            Hier definierst du, was dein TraumNest braucht.
+            Hier stellst du ein, wie streng wir bewerten.
+        </div>
+
+        <div class="form-card glass-card" style="border-left: 5px solid var(--c-primary);">
+            <h3>💰 Budget & Regeln</h3>
+            <div class="form-grid" style="align-items:center;">
+                <div>
+                    <label>Max. Warmmiete (€)</label>
+                    <input type="number" id="conf-budget" placeholder="1000" onchange="saveConfig()">
+                </div>
+                <div style="display:flex; align-items:center; height:100%; padding-top:15px;">
+                    <label class="switch">
+                        <input type="checkbox" id="conf-use-budget" onchange="saveConfig()">
+                        <span class="slider round"></span>
+                    </label>
+                    <span style="font-size:0.8rem; margin-left:10px; font-weight:700; color:var(--c-text-light);">Score beeinflussen</span>
+                </div>
+            </div>
         </div>
 
         <div class="form-card glass-card b-red">
-            <h3>🔴 No-Gos (Auf keinen Fall)</h3>
+            <h3>🔴 No-Gos</h3>
             <div class="input-row">
                 <input type="text" id="input-red" placeholder="z.B. Dunkel...">
                 <button onclick="addCriterion('red')" class="btn-icon">➕</button>
@@ -193,7 +210,7 @@
         </div>
         
         <div class="form-card glass-card b-yellow">
-            <h3>🟡 Kompromisse (Naja...)</h3>
+            <h3>🟡 Kompromisse</h3>
             <div class="input-row">
                 <input type="text" id="input-yellow" placeholder="z.B. Kleines Bad...">
                 <button onclick="addCriterion('yellow')" class="btn-icon">➕</button>
@@ -202,7 +219,7 @@
         </div>
         
         <div class="form-card glass-card b-green">
-            <h3>🟢 Wünsche (Traumhaft)</h3>
+            <h3>🟢 Wünsche</h3>
             <div class="input-row">
                 <input type="text" id="input-green" placeholder="z.B. Badewanne...">
                 <button onclick="addCriterion('green')" class="btn-icon">➕</button>
@@ -241,6 +258,8 @@
         </div>
     </div>
 </div>
+
+<div id="toast" class="toast">Nummer kopiert! 📋</div>
 
 </body>
 </html>

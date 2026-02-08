@@ -5,6 +5,12 @@ const defaultCriteria = {
     green: ["Balkon / Terrasse", "Einbauküche inkl.", "Ruhige Lage", "Tageslichtbad"]
 };
 
+// Default Settings
+const defaultSettings = {
+    budget: 0,
+    useBudget: false
+};
+
 // --- MASCOT SPRÜCHE ---
 const phrases = {
     bello: [
@@ -28,41 +34,59 @@ const phrases = {
 };
 
 // Helper: Unique ID
-function generateId() {
-    return Date.now() + Math.floor(Math.random() * 10000);
-}
+function generateId() { return Date.now() + Math.floor(Math.random() * 10000); }
 
 // Test Data
 const testDataTemplate = [
     {
-        facts: { street: "Sonnenallee 1", zip: "10115", city: "Berlin", size: "85", rooms: "3", floor: "4. OG", date: "2026-03-01", cold: "1200", warm: "1450", deposit: "3600", link: "", contactName: "Fr. Glück", contactInfo: "030 123456", notes: "Traumwohnung! Hell, Dielenboden." },
+        facts: { street: "Sonnenallee 1", zip: "10115", city: "Berlin", size: "85", rooms: "3", floor: "4. OG", date: "2026-03-01", cold: "1200", warm: "1450", deposit: "3600", link: "", contactName: "Fr. Glück", contactInfo: "030 123456", notes: "Traumwohnung! Hell, Dielenboden. Fühlt sich gut an." },
         criteria: { red: [], yellow: [], green: ["Balkon / Terrasse", "Einbauküche inkl.", "Ruhige Lage", "Tageslichtbad"] },
         counts: { r: 0, y: 0, g: 4 }, 
         timestamp: new Date().toLocaleDateString()
     }
 ];
 
+// Load State
 let criteria = JSON.parse(localStorage.getItem('myCriteriaV2')) || defaultCriteria;
+let settings = JSON.parse(localStorage.getItem('mySettings')) || defaultSettings;
 let storedApts = localStorage.getItem('myApartmentsV2');
 let apartments = storedApts ? JSON.parse(storedApts) : [];
 
-if (!storedApts && apartments.length === 0) {
-    loadTestData(true); 
-}
+if (!storedApts && apartments.length === 0) { loadTestData(true); }
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
     renderConfigLists();
+    loadSettingsUI();
     renderApartmentList();
 });
+
+// --- SETTINGS LOGIC ---
+function loadSettingsUI() {
+    const budgetInput = document.getElementById('conf-budget');
+    const useBudgetInput = document.getElementById('conf-use-budget');
+    if(budgetInput && useBudgetInput) {
+        budgetInput.value = settings.budget || '';
+        useBudgetInput.checked = settings.useBudget;
+    }
+}
+
+function saveConfig() {
+    const budget = parseFloat(document.getElementById('conf-budget').value) || 0;
+    const useBudget = document.getElementById('conf-use-budget').checked;
+    
+    settings = { budget, useBudget };
+    localStorage.setItem('mySettings', JSON.stringify(settings));
+    
+    // Recalculate everything since settings changed
+    renderApartmentList();
+}
 
 // --- MASCOT LOGIC ---
 function mascotClick(name) {
     const list = phrases[name];
     const randomPhrase = list[Math.floor(Math.random() * list.length)];
-    const displayName = name === 'bello' ? 'Bello 🐶' : 'Cubi 🐴';
-    setMascotText(`<b>${displayName}:</b> ${randomPhrase}`);
-    
+    setMascotText(`<b>${name === 'bello' ? 'Bello 🐶' : 'Cubi 🐴'}:</b> ${randomPhrase}`);
     const selector = name === 'bello' ? '.mascot.dog' : '.mascot.horse';
     const el = document.querySelector(selector);
     if(el) {
@@ -104,10 +128,11 @@ function switchView(viewName) {
         document.getElementById('edit-id').value = ""; 
     } else if (viewName === 'config') {
         setMascotText("Cubi: Was ist dir wirklich wichtig?");
+        loadSettingsUI();
     }
 }
 
-// --- CONFIG LISTS (CHIPS) ---
+// --- CONFIG LISTS ---
 function renderConfigLists() {
     ['red', 'yellow', 'green'].forEach(type => {
         const listEl = document.getElementById('list-' + type);
@@ -156,22 +181,18 @@ function loadEvaluationForm(checkedItems = []) {
         items.forEach(item => {
             const label = document.createElement('label');
             label.className = 'check-item';
-            
             const input = document.createElement('input');
             input.type = 'checkbox';
             input.name = type;
             input.value = item;
-            
             if (checkedSet.has(item)) {
                 input.checked = true;
                 label.classList.add('selected');
             }
-            
             input.addEventListener('change', () => {
                 if(input.checked) label.classList.add('selected');
                 else label.classList.remove('selected');
             });
-
             label.appendChild(input);
             label.appendChild(document.createTextNode(item));
             div.appendChild(label);
@@ -186,11 +207,9 @@ function loadEvaluationForm(checkedItems = []) {
 function editApartment(id) {
     const apt = apartments.find(a => a.id === id);
     if(!apt) return;
-
     switchView('new');
     document.getElementById('edit-id').value = apt.id;
     setMascotText("Bello: Wir polieren das Inserat auf!");
-
     const f = apt.facts;
     const mapping = ['street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'];
     mapping.forEach(key => {
@@ -199,7 +218,6 @@ function editApartment(id) {
     });
     document.getElementById('f-contact-name').value = f.contactName || "";
     document.getElementById('f-contact-info').value = f.contactInfo || "";
-
     let allChecked = [];
     if(apt.criteria) {
         allChecked = [...(apt.criteria.red||[]), ...(apt.criteria.yellow||[]), ...(apt.criteria.green||[])];
@@ -209,10 +227,25 @@ function editApartment(id) {
 
 function cancelEdit() { switchView('list'); }
 
-// --- SCORE ---
-function calculateScore(reds, yellows, greens) {
+// --- SCORE LOGIC (Budget Included) ---
+function calculateScore(reds, yellows, greens, warmRent) {
     if (reds > 0) return 0;
+    
     let score = 50 + (greens * 10) - (yellows * 10);
+
+    // Budget Calculation
+    if (settings.useBudget && settings.budget > 0 && warmRent) {
+        const diff = warmRent - settings.budget;
+        if (diff > 0) {
+            // Penalty: -1 point per 10 EUR over budget
+            const penalty = Math.ceil(diff / 10);
+            score -= penalty;
+        } else {
+            // Bonus: +5 points for staying in budget
+            score += 5;
+        }
+    }
+
     if (score > 100) score = 100;
     if (score < 0) score = 0;
     return score;
@@ -230,6 +263,9 @@ function calculateAndSave() {
     const cYellow = getChecked('yellow');
     const cGreen = getChecked('green');
     
+    // Warm rent as number for calc
+    const warmRent = parseFloat(facts.warm) || 0;
+
     let message = "Gespeichert!";
     if(cRed.length > 0) message = "Fury schnaubt: Rote Flagge! Aber gut, dass wir es gesehen haben.";
     else if (cGreen.length > cYellow.length) message = "Bello bellt: Juhu! Das sieht nach einem Treffer aus, Julia!";
@@ -267,9 +303,22 @@ function getVerdict(score, reds) {
     return { text: "🏆 Traum", bg: "#e3f2fd", col: "#0984e3", bar: "#00e676" };
 }
 
-// --- FILTER & RENDER ---
-let currentFilter = 'all';
+// --- CONTACT ACTIONS ---
+function openMail(mail) {
+    window.location.href = `mailto:${mail}`;
+}
 
+function copyPhone(phone) {
+    if(!phone) return;
+    navigator.clipboard.writeText(phone).then(() => {
+        const toast = document.getElementById('toast');
+        toast.className = "toast show";
+        setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    });
+}
+
+// --- RENDER LIST ---
+let currentFilter = 'all';
 function setFilter(type) {
     currentFilter = type;
     document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
@@ -287,7 +336,8 @@ function renderApartmentList() {
     container.innerHTML = '';
 
     const filtered = apartments.filter(apt => {
-        const score = calculateScore(apt.counts.r, apt.counts.y, apt.counts.g);
+        const warmRent = parseFloat(apt.facts.warm) || 0;
+        const score = calculateScore(apt.counts.r, apt.counts.y, apt.counts.g, warmRent);
         const reds = apt.counts.r;
         if (currentFilter === 'all') return true;
         if (currentFilter === 'top') return score > 60 && reds === 0;
@@ -303,7 +353,8 @@ function renderApartmentList() {
     emptyState.style.display = 'none';
 
     filtered.forEach(apt => {
-        const score = calculateScore(apt.counts.r, apt.counts.y, apt.counts.g);
+        const warmRent = parseFloat(apt.facts.warm) || 0;
+        const score = calculateScore(apt.counts.r, apt.counts.y, apt.counts.g, warmRent);
         const verdict = getVerdict(score, apt.counts.r);
         const f = apt.facts;
         
@@ -312,9 +363,22 @@ function renderApartmentList() {
         card.style.borderLeft = `5px solid ${verdict.bar}`;
 
         const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(f.street + ' ' + f.zip + ' ' + f.city)}`;
+        
+        // NOTES Display
+        const notesHtml = f.notes ? `<div class="apt-notes"><strong>📝 Julias Notiz</strong>${f.notes}</div>` : '';
 
-        // NOTES DISPLAY LOGIC
-        const notesHtml = f.notes ? `<div class="apt-notes"><strong>📝 Notizen</strong>${f.notes}</div>` : '';
+        // CONTACT Display
+        let contactHtml = '';
+        if (f.contactName || f.contactInfo) {
+            contactHtml = `
+            <div class="contact-row">
+                <div class="contact-name">👤 ${f.contactName || 'Kontakt'}</div>
+                <div class="contact-actions">
+                    ${f.contactInfo && f.contactInfo.includes('@') ? `<button class="btn-contact c-mail" onclick="openMail('${f.contactInfo}')">✉️</button>` : ''}
+                    ${f.contactInfo ? `<button class="btn-contact c-phone" onclick="copyPhone('${f.contactInfo}')">📞</button>` : ''}
+                </div>
+            </div>`;
+        }
 
         card.innerHTML = `
             <div class="apt-header">
@@ -339,6 +403,7 @@ function renderApartmentList() {
                 <div><strong>${f.deposit} €</strong><br>Kaution</div>
             </div>
 
+            ${contactHtml}
             ${notesHtml}
 
             <div class="score-container">
@@ -378,8 +443,5 @@ function loadTestData(silent = false) {
     apartments.push(...newTestApts);
     localStorage.setItem('myApartmentsV2', JSON.stringify(apartments));
     renderApartmentList();
-    if(!silent) {
-        switchView('list');
-        setMascotText("Cubi: Ich habe dir ein Beispiel zum Testen gebracht!");
-    }
+    if(!silent) { switchView('list'); setMascotText("Cubi: Ich habe dir ein Beispiel zum Testen gebracht!"); }
 }
