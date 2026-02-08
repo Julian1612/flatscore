@@ -5,7 +5,7 @@ const defaultCriteria = {
     green: ["Balkon / Terrasse", "Einbauküche inkl.", "Ruhige Lage", "Tageslichtbad"]
 };
 
-// --- MASCOT SPRÜCHE (Für Julia) ---
+// --- MASCOT SPRÜCHE ---
 const phrases = {
     bello: [
         "Wuff! Julia, du findest das perfekte Zuhause, ich spür das!",
@@ -27,12 +27,12 @@ const phrases = {
     ]
 };
 
-// Helper: Unique ID Generator
+// Helper: Unique ID
 function generateId() {
     return Date.now() + Math.floor(Math.random() * 10000);
 }
 
-// Test Data Template
+// Test Data
 const testDataTemplate = [
     {
         facts: { street: "Sonnenallee 1", zip: "10115", city: "Berlin", size: "85", rooms: "3", floor: "4. OG", date: "2026-03-01", cold: "1200", warm: "1450", deposit: "3600", link: "", contactName: "Fr. Glück", contactInfo: "030 123456", notes: "Traumwohnung! Hell, Dielenboden." },
@@ -42,32 +42,27 @@ const testDataTemplate = [
     }
 ];
 
-// Load State
 let criteria = JSON.parse(localStorage.getItem('myCriteriaV2')) || defaultCriteria;
 let storedApts = localStorage.getItem('myApartmentsV2');
 let apartments = storedApts ? JSON.parse(storedApts) : [];
 
-// First Start Check
 if (!storedApts && apartments.length === 0) {
     loadTestData(true); 
 }
 
-// --- INITIALIZATION ---
+// --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
     renderConfigLists();
     renderApartmentList();
 });
 
-// --- MASCOT INTERACTION ---
+// --- MASCOT LOGIC ---
 function mascotClick(name) {
     const list = phrases[name];
     const randomPhrase = list[Math.floor(Math.random() * list.length)];
-    
-    // Set Name & Text
     const displayName = name === 'bello' ? 'Bello 🐶' : 'Cubi 🐴';
     setMascotText(`<b>${displayName}:</b> ${randomPhrase}`);
     
-    // Animation Trigger
     const selector = name === 'bello' ? '.mascot.dog' : '.mascot.horse';
     const el = document.querySelector(selector);
     if(el) {
@@ -80,7 +75,6 @@ function setMascotText(text) {
     const bubble = document.getElementById('speech-text');
     if(bubble) {
         bubble.innerHTML = text;
-        // Kleiner "Pop" Effekt für die Blase
         const container = document.querySelector('.speech-bubble');
         container.style.transform = "scale(1.05)";
         setTimeout(() => container.style.transform = "scale(1)", 150);
@@ -89,24 +83,16 @@ function setMascotText(text) {
 
 // --- NAVIGATION ---
 function switchView(viewName) {
-    // Hide all main sections
     document.querySelectorAll('.view-section').forEach(el => {
-        // Mascot area stays visible unless needed otherwise
         if(el.id !== 'mascot-feedback') el.classList.remove('active');
     });
-    
-    // Reset Nav Buttons
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
-    // Show Target View
     document.getElementById('view-' + viewName).classList.add('active');
     
-    // Activate Nav Button (Mapping IDs)
     if(viewName === 'list') document.getElementById('nav-list').classList.add('active');
-    // 'new' button usually doesn't hold 'active' state visually in iOS tabs often, but we keep it consistent
     if(viewName === 'config') document.getElementById('nav-config').classList.add('active');
 
-    // Context Logic
     if(viewName === 'new') {
         if(!document.getElementById('edit-id').value) {
             resetForm();
@@ -115,20 +101,19 @@ function switchView(viewName) {
     } else if (viewName === 'list') {
         renderApartmentList();
         setMascotText("Fury: Hier ist dein Überblick, Julia.");
-        document.getElementById('edit-id').value = ""; // Exit Edit Mode
+        document.getElementById('edit-id').value = ""; 
     } else if (viewName === 'config') {
         setMascotText("Cubi: Was ist dir wirklich wichtig?");
     }
 }
 
-// --- CONFIG LOGIC (CHIP LIST GENERATOR) ---
+// --- CONFIG LISTS (CHIPS) ---
 function renderConfigLists() {
     ['red', 'yellow', 'green'].forEach(type => {
         const listEl = document.getElementById('list-' + type);
         listEl.innerHTML = '';
         criteria[type].forEach((item, index) => {
             const li = document.createElement('li');
-            // Generiert den Chip mit dem Löschen-X
             li.innerHTML = `<span>${item}</span><button class="delete-chip" onclick="deleteCriterion('${type}', ${index})">✕</button>`;
             listEl.appendChild(li);
         });
@@ -151,10 +136,9 @@ function deleteCriterion(type, index) {
     renderConfigLists();
 }
 
-// --- FORM MANAGEMENT ---
+// --- FORM MANAGEMENT (FIXED INTERACTION) ---
 function resetForm() {
     document.getElementById('edit-id').value = "";
-    // Clear all inputs
     document.querySelectorAll('#view-new input, #view-new textarea').forEach(i => { if(i.type !== "hidden") i.value = ''; });
     loadEvaluationForm([]);
 }
@@ -170,10 +154,29 @@ function loadEvaluationForm(checkedItems = []) {
         div.className = `form-card glass-card ${cssClass}`;
         div.innerHTML = `<h3>${title}</h3>`;
         items.forEach(item => {
-            const isChecked = checkedSet.has(item) ? 'checked' : '';
+            // Build Elements manually for better Event handling
             const label = document.createElement('label');
             label.className = 'check-item';
-            label.innerHTML = `<input type="checkbox" name="${type}" value="${item}" ${isChecked}> ${item}`;
+            
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.name = type;
+            input.value = item;
+            
+            if (checkedSet.has(item)) {
+                input.checked = true;
+                label.classList.add('selected');
+            }
+            
+            // The Fix: Click anywhere on label toggles class
+            input.addEventListener('change', () => {
+                if(input.checked) label.classList.add('selected');
+                else label.classList.remove('selected');
+            });
+
+            // Prevent text selection
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(item));
             div.appendChild(label);
         });
         container.appendChild(div);
@@ -191,23 +194,15 @@ function editApartment(id) {
     document.getElementById('edit-id').value = apt.id;
     setMascotText("Bello: Wir polieren das Inserat auf!");
 
-    // Load Facts
     const f = apt.facts;
-    // Map IDs to object keys
-    const mapping = [
-        'street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 
-        'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'
-    ];
-    
+    const mapping = ['street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'];
     mapping.forEach(key => {
         const el = document.getElementById('f-' + key);
         if(el) el.value = f[key] || "";
     });
-    
     document.getElementById('f-contact-name').value = f.contactName || "";
     document.getElementById('f-contact-info').value = f.contactInfo || "";
 
-    // Load Checks
     let allChecked = [];
     if(apt.criteria) {
         allChecked = [...(apt.criteria.red||[]), ...(apt.criteria.yellow||[]), ...(apt.criteria.green||[])];
@@ -217,12 +212,10 @@ function editApartment(id) {
 
 function cancelEdit() { switchView('list'); }
 
-// --- SCORE LOGIC (0-100%) ---
+// --- SCORE ---
 function calculateScore(reds, yellows, greens) {
     if (reds > 0) return 0;
-    // Basis 50 + Bonus/Malus
     let score = 50 + (greens * 10) - (yellows * 10);
-    // Clamp 0-100
     if (score > 100) score = 100;
     if (score < 0) score = 0;
     return score;
@@ -230,13 +223,8 @@ function calculateScore(reds, yellows, greens) {
 
 function calculateAndSave() {
     const editId = document.getElementById('edit-id').value;
-    
-    // Gather Data
     const facts = {};
-    const mapping = [
-        'street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 
-        'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'
-    ];
+    const mapping = ['street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'];
     mapping.forEach(key => facts[key] = document.getElementById('f-' + key).value);
     facts.contactName = document.getElementById('f-contact-name').value;
     facts.contactInfo = document.getElementById('f-contact-info').value;
@@ -273,7 +261,7 @@ function getChecked(name) {
     return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
 }
 
-// --- VERDICT HELPER ---
+// --- VERDICT ---
 function getVerdict(score, reds) {
     if (reds > 0 || score === 0) return { text: "⛔️ K.O.", bg: "#ffebee", col: "#c62828", bar: "#ef5350" };
     if (score <= 40) return { text: "⚠️ Risiko", bg: "#fff3e0", col: "#e65100", bar: "#ff9800" };
@@ -288,14 +276,11 @@ let currentFilter = 'all';
 function setFilter(type) {
     currentFilter = type;
     document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
-    
-    // Find correct button index (simple way)
     const btns = document.querySelectorAll('.btn-filter');
     if(type==='all') btns[0].classList.add('active');
     if(type==='top') btns[1].classList.add('active');
     if(type==='ok') btns[2].classList.add('active');
     if(type==='flop') btns[3].classList.add('active');
-    
     renderApartmentList();
 }
 
@@ -307,7 +292,6 @@ function renderApartmentList() {
     const filtered = apartments.filter(apt => {
         const score = calculateScore(apt.counts.r, apt.counts.y, apt.counts.g);
         const reds = apt.counts.r;
-
         if (currentFilter === 'all') return true;
         if (currentFilter === 'top') return score > 60 && reds === 0;
         if (currentFilter === 'ok') return score > 0 && score <= 60 && reds === 0;
@@ -328,7 +312,7 @@ function renderApartmentList() {
         
         const card = document.createElement('div');
         card.className = `apt-card`;
-        card.style.borderLeft = `5px solid ${verdict.bar}`; // Visual Indicator
+        card.style.borderLeft = `5px solid ${verdict.bar}`;
 
         const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(f.street + ' ' + f.zip + ' ' + f.city)}`;
 
@@ -375,38 +359,20 @@ function renderApartmentList() {
 
 // --- MODAL DELETE ---
 let deleteId = null;
-
-function askDelete(id) {
-    deleteId = id; 
-    document.getElementById('delete-modal').classList.add('active'); 
-}
-
-function closeModal() {
-    deleteId = null; 
-    document.getElementById('delete-modal').classList.remove('active'); 
-}
-
+function askDelete(id) { deleteId = id; document.getElementById('delete-modal').classList.add('active'); }
+function closeModal() { deleteId = null; document.getElementById('delete-modal').classList.remove('active'); }
 function confirmDelete() {
     if(deleteId) {
         apartments = apartments.filter(a => a.id !== deleteId);
         localStorage.setItem('myApartmentsV2', JSON.stringify(apartments));
         renderApartmentList();
-        
-        if(document.getElementById('edit-id').value == deleteId) {
-            resetForm();
-        }
+        if(document.getElementById('edit-id').value == deleteId) resetForm();
         closeModal();
     }
 }
 
-// --- TEST DATA LOADER ---
 function loadTestData(silent = false) {
-    // Unique IDs generieren für Testdaten
-    const newTestApts = testDataTemplate.map(t => ({
-        ...t, 
-        id: generateId() + Math.random() 
-    }));
-
+    const newTestApts = testDataTemplate.map(t => ({...t, id: generateId() + Math.random()}));
     apartments.push(...newTestApts);
     localStorage.setItem('myApartmentsV2', JSON.stringify(apartments));
     renderApartmentList();

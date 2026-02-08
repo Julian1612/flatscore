@@ -75,7 +75,6 @@ body {
     max-width: 600px;
     margin: 0 auto;
     min-height: 100vh;
-    /* Auf Desktop Glass-Effekt an den Rändern, Mobil Vollbild */
     background: rgba(255,255,255,0.2);
 }
 
@@ -114,7 +113,7 @@ h1 {
     justify-content: space-around;
     align-items: center;
     z-index: 100;
-    padding-bottom: env(safe-area-inset-bottom); /* iPhone Home Bar Safe Area */
+    padding-bottom: env(safe-area-inset-bottom);
     box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
 }
 
@@ -358,7 +357,7 @@ label {
     gap: 10px; 
     margin-bottom: 25px; 
     overflow-x: auto; 
-    padding: 5px 2px 15px 2px; /* Bottom padding for shadow */
+    padding: 5px 2px 15px 2px;
     scrollbar-width: none; 
     -webkit-overflow-scrolling: touch;
 }
@@ -386,13 +385,12 @@ label {
 .apt-card {
     position: relative;
     overflow: hidden;
-    padding: 0; /* Content wrapper handles padding */
+    padding: 0; 
     transition: transform 0.2s;
-    border-left: 0; /* Reset old style */
+    border-left: 0;
 }
 .apt-card:active { transform: scale(0.98); }
 
-/* Header/Image Area Placeholder */
 .apt-header { 
     padding: 20px 20px 10px 20px;
     display: flex; 
@@ -419,7 +417,7 @@ label {
 .fact-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1px; /* Divider look */
+    gap: 1px;
     background: rgba(0,0,0,0.03);
     border-radius: 16px;
     padding: 15px;
@@ -461,6 +459,27 @@ label {
 .btn-map { background: white; color: var(--c-text); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .btn-ad { background: var(--c-text); color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 
+/* --- CHECKBOXES (Bugfix: Universal Active Class) --- */
+.check-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(255,255,255,0.5);
+    margin-bottom: 8px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none; /* No Text Selection */
+    border: 2px solid transparent;
+}
+.check-item:active { transform: scale(0.98); }
+.check-item input { width: 22px; height: 22px; margin-right: 12px; border-radius: 6px; box-shadow: none; accent-color: var(--c-text); pointer-events: none; /* Let Parent Handle Click */ }
+
+/* The fix: Use .selected class added by JS */
+.b-red .check-item.selected { background: #ffebee; border-color: #ffcdd2; color: #c62828; }
+.b-yellow .check-item.selected { background: #fffde7; border-color: #fff9c4; color: #f9a825; }
+.b-green .check-item.selected { background: #e8f5e9; border-color: #c8e6c9; color: #2e7d32; }
+
 /* --- CONFIG LIST (CHIPS) --- */
 .config-list { 
     list-style: none; 
@@ -484,9 +503,9 @@ label {
     border: 1px solid transparent;
 }
 
-.b-red .config-list li { background: #ffebee; color: #c62828; }
-.b-yellow .config-list li { background: #fffde7; color: #f9a825; }
-.b-green .config-list li { background: #e8f5e9; color: #2e7d32; }
+.b-red .config-list li { background: #ffebee; color: #c62828; border-color: #ffcdd2;}
+.b-yellow .config-list li { background: #fffde7; color: #f9a825; border-color: #fff9c4;}
+.b-green .config-list li { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9;}
 
 /* The Delete X in Chip */
 .delete-chip {
