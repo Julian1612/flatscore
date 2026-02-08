@@ -2,8 +2,8 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wohnungs-Profi | V3 Final</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wohnungs-Profi App</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/app.js" defer></script>
 </head>
@@ -12,8 +12,8 @@
 <header>
     <h1>🏡 Wohnungs-Profi</h1>
     <nav>
-        <button onclick="switchView('list')" class="btn-nav active" id="nav-list">Meine Liste</button>
-        <button onclick="switchView('new')" class="btn-nav" id="nav-new">Neue Wohnung</button>
+        <button onclick="switchView('list')" class="btn-nav active" id="nav-list">Liste</button>
+        <button onclick="switchView('new')" class="btn-nav" id="nav-new">+ Neu</button>
         <button onclick="switchView('config')" class="btn-nav" id="nav-config">Kriterien</button>
     </nav>
 </header>
@@ -49,9 +49,17 @@
 </div>
 
 <div id="view-list" class="view-section active">
+    
+    <div class="filter-bar">
+        <button class="btn-filter active" onclick="setFilter('all')">Alle</button>
+        <button class="btn-filter" onclick="setFilter('top')">🏆 Top</button>
+        <button class="btn-filter" onclick="setFilter('ok')">🤔 Naja</button>
+        <button class="btn-filter" onclick="setFilter('flop')">⛔️ K.O.</button>
+    </div>
+
     <div id="apartments-container"></div>
     <div id="empty-state" style="text-align: center; color: #888; margin-top: 50px; display: none;">
-        Noch leer hier.<br>Klicke auf "Neue Wohnung"!
+        Noch leer hier.<br>Tippe oben auf "+ Neu"!
     </div>
 </div>
 
@@ -75,7 +83,7 @@
             </div>
             <div>
                 <label>PLZ</label>
-                <input type="text" id="f-zip" placeholder="12345">
+                <input type="number" id="f-zip" placeholder="12345" pattern="\d*">
             </div>
             <div>
                 <label>Stadt</label>
@@ -83,11 +91,11 @@
             </div>
             <div>
                 <label>Größe (m²)</label>
-                <input type="number" id="f-size" placeholder="65">
+                <input type="number" id="f-size" placeholder="65" pattern="\d*">
             </div>
             <div>
                 <label>Zimmer</label>
-                <input type="number" id="f-rooms" placeholder="2.5">
+                <input type="number" id="f-rooms" placeholder="2.5" step="0.5">
             </div>
             <div>
                 <label>Etage</label>
@@ -95,7 +103,7 @@
             </div>
             <div>
                 <label>Frei ab</label>
-                <input type="text" id="f-date" placeholder="sofort">
+                <input type="date" id="f-date" placeholder="sofort">
             </div>
         </div>
     </div>
@@ -105,23 +113,23 @@
         <div class="form-grid">
             <div>
                 <label>Kaltmiete (€)</label>
-                <input type="number" id="f-cold" placeholder="800">
+                <input type="number" id="f-cold" placeholder="800" pattern="\d*">
             </div>
             <div>
                 <label>Nebenkosten (€)</label>
-                <input type="number" id="f-nk" placeholder="150">
+                <input type="number" id="f-nk" placeholder="150" pattern="\d*">
             </div>
             <div>
                 <label>Heizkosten (€)</label>
-                <input type="number" id="f-heat" placeholder="inkl. oder extra">
+                <input type="number" id="f-heat" placeholder="inkl." pattern="\d*">
             </div>
             <div>
                 <label><strong>Warmmiete (€)</strong></label>
-                <input type="number" id="f-warm" placeholder="950" style="font-weight:bold; background:#fffef0;">
+                <input type="number" id="f-warm" placeholder="950" style="font-weight:bold; background:#fffef0;" pattern="\d*">
             </div>
             <div class="full-width">
                  <label>Kaution (Total €)</label>
-                 <input type="number" id="f-deposit" placeholder="2400">
+                 <input type="number" id="f-deposit" placeholder="2400" pattern="\d*">
             </div>
         </div>
     </div>
@@ -147,7 +155,7 @@
     <div id="evaluation-form"></div>
 
     <button class="btn-action" onclick="calculateAndSave()">Speichern & Auswerten</button>
-    <button onclick="cancelEdit()" style="width:100%; margin-top:10px; background:transparent; color:#888; border:none; cursor:pointer;">Abbrechen</button>
+    <button onclick="cancelEdit()" class="btn-secondary">Abbrechen</button>
 </div>
 
 <div id="view-config" class="view-section">
@@ -156,7 +164,7 @@
         <h3>🔴 Red Lights (Dealbreaker)</h3>
         <div style="display:flex; gap:5px;">
             <input type="text" id="input-red" placeholder="Neues Kriterium...">
-            <button onclick="addCriterion('red')" style="background:var(--pastel-red-dark); color:white;">+</button>
+            <button onclick="addCriterion('red')" class="btn-add" style="background:var(--pastel-red-dark);">+</button>
         </div>
         <ul id="list-red" class="config-list"></ul>
     </div>
@@ -164,7 +172,7 @@
         <h3>🟡 Yellow Lights (Naja...)</h3>
         <div style="display:flex; gap:5px;">
             <input type="text" id="input-yellow" placeholder="Neues Kriterium...">
-            <button onclick="addCriterion('yellow')" style="background:var(--pastel-yellow-dark); color:black;">+</button>
+            <button onclick="addCriterion('yellow')" class="btn-add" style="background:var(--pastel-yellow-dark); color:black;">+</button>
         </div>
         <ul id="list-yellow" class="config-list"></ul>
     </div>
@@ -172,20 +180,20 @@
         <h3>🟢 Green Lights (Super!)</h3>
         <div style="display:flex; gap:5px;">
             <input type="text" id="input-green" placeholder="Neues Kriterium...">
-            <button onclick="addCriterion('green')" style="background:var(--pastel-green-dark); color:white;">+</button>
+            <button onclick="addCriterion('green')" class="btn-add" style="background:var(--pastel-green-dark);">+</button>
         </div>
         <ul id="list-green" class="config-list"></ul>
     </div>
-    <button class="btn-test" onclick="loadTestData()">🛠️ 2 Test-Inserate laden (Reset)</button>
+    <button class="btn-test" onclick="loadTestData()">🛠️ 2 Test-Inserate laden</button>
 </div>
 
 <div id="delete-modal" class="modal-overlay">
     <div class="modal-box">
         <h3>🗑️ Wirklich löschen?</h3>
-        <p>Du kannst das nicht rückgängig machen.</p>
+        <p>Nur diese eine Wohnung wird unwiderruflich gelöscht.</p>
         <div class="modal-buttons">
             <button onclick="closeModal()" class="btn-cancel">Abbrechen</button>
-            <button onclick="confirmDelete()" class="btn-confirm">Ja, löschen</button>
+            <button onclick="confirmDelete()" class="btn-confirm">Ja, weg damit</button>
         </div>
     </div>
 </div>

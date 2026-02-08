@@ -5,10 +5,14 @@ const defaultCriteria = {
     green: ["Balkon / Terrasse", "Einbauküche inkl.", "Ruhige Lage", "Tageslichtbad"]
 };
 
+// HELPER: Unique ID Generator
+function generateId() {
+    return Date.now() + Math.floor(Math.random() * 10000);
+}
+
 // TEST DATA
-const testApartments = [
+const testDataTemplate = [
     {
-        id: 101,
         facts: { street: "Sonnenallee 1", zip: "10115", city: "Berlin", size: "85", rooms: "3", floor: "4. OG", date: "2026-03-01", cold: "1200", warm: "1450", deposit: "3600", link: "", contactName: "Fr. Glück", contactInfo: "030 123456", notes: "Traumwohnung! Hell, Dielenboden." },
         criteria: { red: [], yellow: [], green: ["Balkon / Terrasse", "Einbauküche inkl.", "Ruhige Lage", "Tageslichtbad"] },
         counts: { r: 0, y: 0, g: 4 }, 
@@ -18,9 +22,11 @@ const testApartments = [
 
 let criteria = JSON.parse(localStorage.getItem('myCriteriaV2')) || defaultCriteria;
 let storedApts = localStorage.getItem('myApartmentsV2');
-let apartments = storedApts ? JSON.parse(storedApts) : [...testApartments];
+let apartments = storedApts ? JSON.parse(storedApts) : [];
 
-if (!storedApts) localStorage.setItem('myApartmentsV2', JSON.stringify(apartments));
+if (!storedApts && apartments.length === 0) {
+    loadTestData(true); 
+}
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -45,7 +51,7 @@ function switchView(viewName) {
         }
     } else if (viewName === 'list') {
         renderApartmentList();
-        setMascotText("Fury: Hier ist deine Übersicht. Der Score zeigt dir die Qualität.");
+        setMascotText("Fury: Hier ist deine Übersicht. Tippe auf eine Karte für mehr Details.");
         document.getElementById('edit-id').value = "";
     } else if (viewName === 'config') {
         setMascotText("Bello: Hier kannst du einstellen, was wir suchen!");
@@ -154,7 +160,7 @@ function editApartment(id) {
 
 function cancelEdit() { switchView('list'); }
 
-// --- SCORE CALCULATION ALGORITHM (0-100%) ---
+// --- SCORE CALCULATION (0-100%) ---
 function calculateScore(reds, yellows, greens) {
     if (reds > 0) return 0;
     let score = 50 + (greens * 10) - (yellows * 10);
@@ -194,7 +200,7 @@ function calculateAndSave() {
     else message = "Bello: Alles gespeichert! Schau dir den Score an.";
 
     const aptData = {
-        id: editId ? parseInt(editId) : Date.now(),
+        id: editId ? parseInt(editId) : generateId(),
         facts: facts,
         criteria: { red: checkedRed, yellow: checkedYellow, green: checkedGreen },
         counts: { r: redsCount, y: checkedYellow.length, g: checkedGreen.length },
@@ -224,6 +230,23 @@ function getVerdict(score, reds) {
     if (score <= 60) return { text: "⚖️ DURCHSCHNITT (Okay)", bg: "#f5f5f5", col: "#616161", bar: "#9e9e9e" };
     if (score <= 80) return { text: "👍 GUT (Empfehlung)", bg: "#e8f5e9", col: "#2e7d32", bar: "#4caf50" };
     return { text: "🏆 TRAUMHAFT (Exzellent!)", bg: "#b9f6ca", col: "#1b5e20", bar: "#00c853" };
+}
+
+// --- FILTER LOGIC ---
+let currentFilter = 'all';
+
+function setFilter(type) {
+    currentFilter = type;
+    
+    document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
+    
+    const buttons = document.querySelectorAll('.btn-filter');
+    if(type === 'all') buttons[0].classList.add('active');
+    if(type === 'top') buttons[1].classList.add('active');
+    if(type === 'ok') buttons[2].classList.add('active');
+    if(type === 'flop') buttons[3].classList.add('active');
+
+    renderApartmentList();
 }
 
 // --- MODAL DELETE LOGIC ---
@@ -265,7 +288,27 @@ function renderApartmentList() {
     }
     emptyState.style.display = 'none';
 
-    apartments.forEach(apt => {
+    // 1. FILTERN
+    const filteredList = apartments.filter(apt => {
+        const score = calculateScore(apt.counts.r, apt.counts.y, apt.counts.g);
+        const reds = apt.counts.r;
+
+        if (currentFilter === 'all') return true;
+        if (currentFilter === 'top') return score > 60 && reds === 0;
+        if (currentFilter === 'ok') return score > 0 && score <= 60 && reds === 0;
+        if (currentFilter === 'flop') return reds > 0 || score === 0;
+        return true;
+    });
+
+    if(filteredList.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:#999; margin-top:40px;">
+            In dieser Kategorie gibt es (noch) keine Wohnungen.
+        </div>`;
+        return;
+    }
+
+    // 2. RENDERN
+    filteredList.forEach(apt => {
         const score = calculateScore(apt.counts.r, apt.counts.y, apt.counts.g);
 
         const card = document.createElement('div');
@@ -312,8 +355,8 @@ function renderApartmentList() {
             </div>
 
             <div class="count-summary">
-                 <span>🟢 ${apt.counts.g} Wins</span> • 
-                 <span>🟡 ${apt.counts.y} Nachteile</span> • 
+                 <span>🟢 ${apt.counts.g}</span> • 
+                 <span>🟡 ${apt.counts.y}</span> • 
                  <span>🔴 ${apt.counts.r} No-Gos</span>
             </div>
             
@@ -326,10 +369,17 @@ function renderApartmentList() {
     });
 }
 
-function loadTestData() {
-    apartments.push(...testApartments);
+function loadTestData(silent = false) {
+    const newTestApts = testDataTemplate.map(t => ({
+        ...t, 
+        id: generateId() + Math.random() 
+    }));
+
+    apartments.push(...newTestApts);
     localStorage.setItem('myApartmentsV2', JSON.stringify(apartments));
     renderApartmentList();
-    switchView('list');
-    setMascotText("Bello: Ich habe dir zwei Beispiele in die Liste gepackt!");
+    if(!silent) {
+        switchView('list');
+        setMascotText("Bello: Ich habe dir Beispiele in die Liste gepackt!");
+    }
 }
