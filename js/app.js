@@ -1,50 +1,58 @@
 // --- CONFIG & STATE ---
 const defaultCriteria = {
-    red: ["Schimmel", "Miete zu hoch", "Befristet", "Keine Heizung"],
-    yellow: ["Kein Keller", "Erdgeschoss", "Teppichboden", "Verkehrslärm"],
-    green: ["Balkon / Terrasse", "Einbauküche", "Badewanne", "Südausrichtung"]
+    red: ["Schimmel / Feuchtigkeit", "Miete über Budget", "Befristeter Vertrag"],
+    yellow: ["Kein Keller", "Erdgeschoss", "Renovierung nötig", "Verkehrslärm"],
+    green: ["Balkon / Terrasse", "Einbauküche inkl.", "Ruhige Lage", "Tageslichtbad"]
 };
 
-// --- MASCOT PHRASES (Jetzt mit Aufmunterung!) ---
+// --- MASCOT SPRÜCHE (Für Julia) ---
 const phrases = {
     bello: [
-        "Wuff! Nicht den Kopf hängen lassen, die nächste wird super!",
-        "Ich rieche... ein Schnäppchen! Bald!",
-        "Vergiss den Balkon nicht! Wuff!",
-        "Hey, atme durch. Wir finden dein neues Zuhause!",
-        "Platz für mein Körbchen? Das wird schon!",
-        "Lass uns das Bad checken, vielleicht gibt's eine Wanne!"
+        "Wuff! Julia, du findest das perfekte Zuhause, ich spür das!",
+        "Lass den Kopf nicht hängen! Die nächste Wohnung wird der Hammer!",
+        "Ich rieche... Erfolg! Bald hast du dein TraumNest.",
+        "Hey Julia, du machst das super! Wuff!",
+        "Vergiss den Balkon nicht – wir brauchen frische Luft!",
+        "Egal wie viele wir anschauen, wir geben nicht auf!",
+        "Ein Leckerli für dich, weil du so tapfer suchst! 🦴"
     ],
     cubi: [
-        "Wiehern! Nur nicht aufgeben, Partner!",
-        "Ich brauche Auslauf, und du eine tolle Wohnung. Packen wir's an!",
-        "Hüh! Die Miete ist hoch, aber wir reiten weiter!",
-        "Kein Aufzug? Egal, wir schaffen das!",
-        "Schnaub... lass dich nicht unterkriegen!",
-        "Achte auf die Nebenkosten, aber verliere nicht den Mut!"
+        "Hüh! Julia, wir galoppieren direkt ins Glück!",
+        "Das war nix? Egal, Hindernis überspringen und weiter!",
+        "Ich brauche Auslauf, und du dein Reich. Wir schaffen das!",
+        "Starke Nerven, Julia! Dein Traumstall wartet schon.",
+        "Schnaub... lass dich nicht von Maklern ärgern.",
+        "Positiv bleiben! Am Ende wird alles gut.",
+        "Wiehern! Auf in die nächste Runde!"
     ]
 };
 
-// Helper: Unique ID
-function generateId() { return Date.now() + Math.floor(Math.random() * 10000); }
+// Helper: Unique ID Generator
+function generateId() {
+    return Date.now() + Math.floor(Math.random() * 10000);
+}
 
-// Test Data
+// Test Data Template
 const testDataTemplate = [
     {
-        facts: { street: "Regenbogenweg 12", zip: "12345", city: "Glückstadt", size: "75", rooms: "3", floor: "2. OG", date: "sofort", cold: "950", warm: "1150", deposit: "2800", contactName: "Fr. Sonnenschein", contactInfo: "0171 123456", notes: "Super hell, tolle Nachbarn!" },
-        criteria: { red: [], yellow: [], green: ["Balkon / Terrasse", "Einbauküche", "Südausrichtung"] },
-        counts: { r: 0, y: 0, g: 3 }, 
+        facts: { street: "Sonnenallee 1", zip: "10115", city: "Berlin", size: "85", rooms: "3", floor: "4. OG", date: "2026-03-01", cold: "1200", warm: "1450", deposit: "3600", link: "", contactName: "Fr. Glück", contactInfo: "030 123456", notes: "Traumwohnung! Hell, Dielenboden." },
+        criteria: { red: [], yellow: [], green: ["Balkon / Terrasse", "Einbauküche inkl.", "Ruhige Lage", "Tageslichtbad"] },
+        counts: { r: 0, y: 0, g: 4 }, 
         timestamp: new Date().toLocaleDateString()
     }
 ];
 
+// Load State
 let criteria = JSON.parse(localStorage.getItem('myCriteriaV2')) || defaultCriteria;
 let storedApts = localStorage.getItem('myApartmentsV2');
 let apartments = storedApts ? JSON.parse(storedApts) : [];
 
-if (!storedApts && apartments.length === 0) { loadTestData(true); }
+// First Start Check
+if (!storedApts && apartments.length === 0) {
+    loadTestData(true); 
+}
 
-// --- INIT ---
+// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     renderConfigLists();
     renderApartmentList();
@@ -54,9 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function mascotClick(name) {
     const list = phrases[name];
     const randomPhrase = list[Math.floor(Math.random() * list.length)];
-    setMascotText(`<b>${name === 'bello' ? 'Bello' : 'Cubi'}:</b> ${randomPhrase}`);
     
-    // Animation
+    // Set Name & Text
+    const displayName = name === 'bello' ? 'Bello 🐶' : 'Cubi 🐴';
+    setMascotText(`<b>${displayName}:</b> ${randomPhrase}`);
+    
+    // Animation Trigger
     const selector = name === 'bello' ? '.mascot.dog' : '.mascot.horse';
     const el = document.querySelector(selector);
     if(el) {
@@ -67,41 +78,58 @@ function mascotClick(name) {
 
 function setMascotText(text) {
     const bubble = document.getElementById('speech-text');
-    if(bubble) bubble.innerHTML = text;
+    if(bubble) {
+        bubble.innerHTML = text;
+        // Kleiner "Pop" Effekt für die Blase
+        const container = document.querySelector('.speech-bubble');
+        container.style.transform = "scale(1.05)";
+        setTimeout(() => container.style.transform = "scale(1)", 150);
+    }
 }
 
 // --- NAVIGATION ---
 function switchView(viewName) {
+    // Hide all main sections
     document.querySelectorAll('.view-section').forEach(el => {
+        // Mascot area stays visible unless needed otherwise
         if(el.id !== 'mascot-feedback') el.classList.remove('active');
     });
-    document.querySelectorAll('.btn-nav').forEach(el => el.classList.remove('active'));
+    
+    // Reset Nav Buttons
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
+    // Show Target View
     document.getElementById('view-' + viewName).classList.add('active');
-    document.getElementById('nav-' + viewName).classList.add('active');
+    
+    // Activate Nav Button (Mapping IDs)
+    if(viewName === 'list') document.getElementById('nav-list').classList.add('active');
+    // 'new' button usually doesn't hold 'active' state visually in iOS tabs often, but we keep it consistent
+    if(viewName === 'config') document.getElementById('nav-config').classList.add('active');
 
+    // Context Logic
     if(viewName === 'new') {
         if(!document.getElementById('edit-id').value) {
             resetForm();
-            setMascotText("Füll die Felder aus, wir rechnen mit!");
+            setMascotText("Bello: Erzähl mir alles! Wir rechnen mit.");
         }
     } else if (viewName === 'list') {
         renderApartmentList();
-        setMascotText("Hier sind deine Fundstücke.");
-        document.getElementById('edit-id').value = "";
+        setMascotText("Fury: Hier ist dein Überblick, Julia.");
+        document.getElementById('edit-id').value = ""; // Exit Edit Mode
     } else if (viewName === 'config') {
-        setMascotText("Hier kannst du deine Wünsche anpassen.");
+        setMascotText("Cubi: Was ist dir wirklich wichtig?");
     }
 }
 
-// --- CONFIG LOGIC ---
+// --- CONFIG LOGIC (CHIP LIST GENERATOR) ---
 function renderConfigLists() {
     ['red', 'yellow', 'green'].forEach(type => {
         const listEl = document.getElementById('list-' + type);
         listEl.innerHTML = '';
         criteria[type].forEach((item, index) => {
             const li = document.createElement('li');
-            li.innerHTML = `<span>${item}</span><button class="btn-icon" style="background:#ffebee; color:red; width:30px; height:30px;" onclick="deleteCriterion('${type}', ${index})">✕</button>`;
+            // Generiert den Chip mit dem Löschen-X
+            li.innerHTML = `<span>${item}</span><button class="delete-chip" onclick="deleteCriterion('${type}', ${index})">✕</button>`;
             listEl.appendChild(li);
         });
     });
@@ -123,9 +151,10 @@ function deleteCriterion(type, index) {
     renderConfigLists();
 }
 
-// --- FORM LOGIC ---
+// --- FORM MANAGEMENT ---
 function resetForm() {
     document.getElementById('edit-id').value = "";
+    // Clear all inputs
     document.querySelectorAll('#view-new input, #view-new textarea').forEach(i => { if(i.type !== "hidden") i.value = ''; });
     loadEvaluationForm([]);
 }
@@ -149,28 +178,36 @@ function loadEvaluationForm(checkedItems = []) {
         });
         container.appendChild(div);
     };
-    createSection("🔴 No-Gos", "red", criteria.red, "b-red");
+    createSection("🔴 Dealbreaker", "red", criteria.red, "b-red");
     createSection("🟡 Kompromisse", "yellow", criteria.yellow, "b-yellow");
-    createSection("🟢 Must-Haves", "green", criteria.green, "b-green");
+    createSection("🟢 Wünsche", "green", criteria.green, "b-green");
 }
 
 function editApartment(id) {
     const apt = apartments.find(a => a.id === id);
     if(!apt) return;
+
     switchView('new');
     document.getElementById('edit-id').value = apt.id;
-    setMascotText("Bearbeitungs-Modus! Ändere, was du willst.");
-    
+    setMascotText("Bello: Wir polieren das Inserat auf!");
+
+    // Load Facts
     const f = apt.facts;
-    // Basic fields mapping
-    const ids = ['street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'];
-    ids.forEach(x => {
-        const el = document.getElementById('f-' + x);
-        if(el) el.value = f[x] || "";
+    // Map IDs to object keys
+    const mapping = [
+        'street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 
+        'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'
+    ];
+    
+    mapping.forEach(key => {
+        const el = document.getElementById('f-' + key);
+        if(el) el.value = f[key] || "";
     });
+    
     document.getElementById('f-contact-name').value = f.contactName || "";
     document.getElementById('f-contact-info').value = f.contactInfo || "";
 
+    // Load Checks
     let allChecked = [];
     if(apt.criteria) {
         allChecked = [...(apt.criteria.red||[]), ...(apt.criteria.yellow||[]), ...(apt.criteria.green||[])];
@@ -180,18 +217,27 @@ function editApartment(id) {
 
 function cancelEdit() { switchView('list'); }
 
-// --- SCORE LOGIC ---
+// --- SCORE LOGIC (0-100%) ---
 function calculateScore(reds, yellows, greens) {
     if (reds > 0) return 0;
+    // Basis 50 + Bonus/Malus
     let score = 50 + (greens * 10) - (yellows * 10);
-    return Math.max(0, Math.min(100, score));
+    // Clamp 0-100
+    if (score > 100) score = 100;
+    if (score < 0) score = 0;
+    return score;
 }
 
 function calculateAndSave() {
     const editId = document.getElementById('edit-id').value;
+    
+    // Gather Data
     const facts = {};
-    const ids = ['street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'];
-    ids.forEach(x => facts[x] = document.getElementById('f-' + x).value);
+    const mapping = [
+        'street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 
+        'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'
+    ];
+    mapping.forEach(key => facts[key] = document.getElementById('f-' + key).value);
     facts.contactName = document.getElementById('f-contact-name').value;
     facts.contactInfo = document.getElementById('f-contact-info').value;
 
@@ -200,8 +246,8 @@ function calculateAndSave() {
     const cGreen = getChecked('green');
     
     let message = "Gespeichert!";
-    if(cRed.length > 0) message = "Cubi schnaubt: Rote Flagge! K.O.";
-    else if (cGreen.length > cYellow.length) message = "Bello bellt: Das sieht gut aus!";
+    if(cRed.length > 0) message = "Fury schnaubt: Rote Flagge! Aber gut, dass wir es gesehen haben.";
+    else if (cGreen.length > cYellow.length) message = "Bello bellt: Juhu! Das sieht nach einem Treffer aus, Julia!";
 
     const aptData = {
         id: editId ? parseInt(editId) : generateId(),
@@ -227,26 +273,30 @@ function getChecked(name) {
     return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
 }
 
-// --- RENDER LIST ---
+// --- VERDICT HELPER ---
+function getVerdict(score, reds) {
+    if (reds > 0 || score === 0) return { text: "⛔️ K.O.", bg: "#ffebee", col: "#c62828", bar: "#ef5350" };
+    if (score <= 40) return { text: "⚠️ Risiko", bg: "#fff3e0", col: "#e65100", bar: "#ff9800" };
+    if (score <= 60) return { text: "⚖️ Okay", bg: "#f5f5f5", col: "#616161", bar: "#b2bec3" };
+    if (score <= 80) return { text: "👍 Gut", bg: "#e8f5e9", col: "#2e7d32", bar: "#66bb6a" };
+    return { text: "🏆 Traum", bg: "#e3f2fd", col: "#0984e3", bar: "#00e676" };
+}
+
+// --- FILTER & RENDER ---
 let currentFilter = 'all';
+
 function setFilter(type) {
     currentFilter = type;
     document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
-    // Simple logic to highlight correct button
+    
+    // Find correct button index (simple way)
     const btns = document.querySelectorAll('.btn-filter');
     if(type==='all') btns[0].classList.add('active');
     if(type==='top') btns[1].classList.add('active');
     if(type==='ok') btns[2].classList.add('active');
     if(type==='flop') btns[3].classList.add('active');
+    
     renderApartmentList();
-}
-
-function getVerdict(score, reds) {
-    if (reds > 0 || score === 0) return { text: "⛔️ K.O.", bg: "#ffebee", col: "#c62828", bar: "#ff7675" };
-    if (score <= 40) return { text: "⚠️ Risiko", bg: "#fff3e0", col: "#e65100", bar: "#ffeaa7" };
-    if (score <= 60) return { text: "⚖️ Okay", bg: "#f5f5f5", col: "#616161", bar: "#b2bec3" };
-    if (score <= 80) return { text: "👍 Gut", bg: "#e8f5e9", col: "#2e7d32", bar: "#55efc4" };
-    return { text: "🏆 Traum", bg: "#e3f2fd", col: "#0984e3", bar: "#74b9ff" };
 }
 
 function renderApartmentList() {
@@ -256,10 +306,12 @@ function renderApartmentList() {
 
     const filtered = apartments.filter(apt => {
         const score = calculateScore(apt.counts.r, apt.counts.y, apt.counts.g);
+        const reds = apt.counts.r;
+
         if (currentFilter === 'all') return true;
-        if (currentFilter === 'top') return score > 60 && apt.counts.r === 0;
-        if (currentFilter === 'ok') return score > 0 && score <= 60 && apt.counts.r === 0;
-        if (currentFilter === 'flop') return apt.counts.r > 0 || score === 0;
+        if (currentFilter === 'top') return score > 60 && reds === 0;
+        if (currentFilter === 'ok') return score > 0 && score <= 60 && reds === 0;
+        if (currentFilter === 'flop') return reds > 0 || score === 0;
         return true;
     });
 
@@ -276,8 +328,8 @@ function renderApartmentList() {
         
         const card = document.createElement('div');
         card.className = `apt-card`;
-        
-        // Google Maps Link
+        card.style.borderLeft = `5px solid ${verdict.bar}`; // Visual Indicator
+
         const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(f.street + ' ' + f.zip + ' ' + f.city)}`;
 
         card.innerHTML = `
@@ -321,24 +373,45 @@ function renderApartmentList() {
     });
 }
 
-// --- DELETE ---
+// --- MODAL DELETE ---
 let deleteId = null;
-function askDelete(id) { deleteId = id; document.getElementById('delete-modal').classList.add('active'); }
-function closeModal() { deleteId = null; document.getElementById('delete-modal').classList.remove('active'); }
+
+function askDelete(id) {
+    deleteId = id; 
+    document.getElementById('delete-modal').classList.add('active'); 
+}
+
+function closeModal() {
+    deleteId = null; 
+    document.getElementById('delete-modal').classList.remove('active'); 
+}
+
 function confirmDelete() {
     if(deleteId) {
         apartments = apartments.filter(a => a.id !== deleteId);
         localStorage.setItem('myApartmentsV2', JSON.stringify(apartments));
         renderApartmentList();
-        if(document.getElementById('edit-id').value == deleteId) resetForm();
+        
+        if(document.getElementById('edit-id').value == deleteId) {
+            resetForm();
+        }
         closeModal();
     }
 }
 
-function loadTestData(silent) {
-    const newData = testDataTemplate.map(t => ({...t, id: generateId() + Math.random()}));
-    apartments.push(...newData);
+// --- TEST DATA LOADER ---
+function loadTestData(silent = false) {
+    // Unique IDs generieren für Testdaten
+    const newTestApts = testDataTemplate.map(t => ({
+        ...t, 
+        id: generateId() + Math.random() 
+    }));
+
+    apartments.push(...newTestApts);
     localStorage.setItem('myApartmentsV2', JSON.stringify(apartments));
     renderApartmentList();
-    if(!silent) { switchView('list'); setMascotText("Demo-Daten geladen!"); }
+    if(!silent) {
+        switchView('list');
+        setMascotText("Cubi: Ich habe dir ein Beispiel zum Testen gebracht!");
+    }
 }
