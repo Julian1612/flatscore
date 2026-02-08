@@ -14,10 +14,7 @@ const phrases = {
         "Hey Julia, du machst das super! Wuff!",
         "Vergiss den Balkon nicht – wir brauchen frische Luft!",
         "Egal wie viele wir anschauen, wir geben nicht auf!",
-        "Ein Leckerli für dich, weil du so tapfer suchst! 🦴",
-        "Wallah, ich schwöre, der nächste Hund der was auf Tauschwohnung hochlädt, bekommt von mir nen fetten Haufen Scheiße auf die Türmatte!",
-        "Sag mir welchen scheiß Kerl dir die Wohnung nicht gegeben hat, und bei Gott ich schöre dir, ich pinkel auf seine Türmatte!"
-
+        "Ein Leckerli für dich, weil du so tapfer suchst! 🦴"
     ],
     cubi: [
         "Hüh! Julia, wir galoppieren direkt ins Glück!",
@@ -26,9 +23,7 @@ const phrases = {
         "Starke Nerven, Julia! Dein Traumstall wartet schon.",
         "Schnaub... lass dich nicht von Maklern ärgern.",
         "Positiv bleiben! Am Ende wird alles gut.",
-        "Wiehern! Auf in die nächste Runde!", 
-        "Wenn ich den Erfinder von Tauschwohnung treffe, dem geb ich ne ordentliche Schelle! Wer so eine scheiße Seite macht, gehört bestraft! Und wenn ich den Typen treffe, der die Wohnung nicht gegeben hat, dem geb ich auch ne Schelle! Alle kriegen ne Schelle von mir, bis du deine Wohnung hast, Julia!",
-        "So eine scheiße Seite wie Tauschwohnung, kann nur ein Gottloser MANN erfunden haben!"
+        "Wiehern! Auf in die nächste Runde!"
     ]
 };
 
@@ -141,7 +136,7 @@ function deleteCriterion(type, index) {
     renderConfigLists();
 }
 
-// --- FORM MANAGEMENT (FIXED INTERACTION) ---
+// --- FORM MANAGEMENT ---
 function resetForm() {
     document.getElementById('edit-id').value = "";
     document.querySelectorAll('#view-new input, #view-new textarea').forEach(i => { if(i.type !== "hidden") i.value = ''; });
@@ -159,7 +154,6 @@ function loadEvaluationForm(checkedItems = []) {
         div.className = `form-card glass-card ${cssClass}`;
         div.innerHTML = `<h3>${title}</h3>`;
         items.forEach(item => {
-            // Build Elements manually for better Event handling
             const label = document.createElement('label');
             label.className = 'check-item';
             
@@ -173,13 +167,11 @@ function loadEvaluationForm(checkedItems = []) {
                 label.classList.add('selected');
             }
             
-            // The Fix: Click anywhere on label toggles class
             input.addEventListener('change', () => {
                 if(input.checked) label.classList.add('selected');
                 else label.classList.remove('selected');
             });
 
-            // Prevent text selection
             label.appendChild(input);
             label.appendChild(document.createTextNode(item));
             div.appendChild(label);
@@ -321,6 +313,9 @@ function renderApartmentList() {
 
         const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(f.street + ' ' + f.zip + ' ' + f.city)}`;
 
+        // NOTES DISPLAY LOGIC
+        const notesHtml = f.notes ? `<div class="apt-notes"><strong>📝 Notizen</strong>${f.notes}</div>` : '';
+
         card.innerHTML = `
             <div class="apt-header">
                 <div>
@@ -343,6 +338,8 @@ function renderApartmentList() {
                 <div style="color:#6c5ce7;"><strong>${f.warm} €</strong><br>Warm</div>
                 <div><strong>${f.deposit} €</strong><br>Kaution</div>
             </div>
+
+            ${notesHtml}
 
             <div class="score-container">
                 <div class="score-bar" style="width: ${score}%; background: ${verdict.bar};"></div>
