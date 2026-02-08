@@ -3,197 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wohnungs-Profi App</title>
+    <title>FlatScore | Cute Edition</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/app.js" defer></script>
 </head>
 <body>
 
-<header>
-    <h1>🏡 Wohnungs-Profi</h1>
-    <nav>
-        <button onclick="switchView('list')" class="btn-nav active" id="nav-list">Liste</button>
-        <button onclick="switchView('new')" class="btn-nav" id="nav-new">+ Neu</button>
-        <button onclick="switchView('config')" class="btn-nav" id="nav-config">Kriterien</button>
-    </nav>
-</header>
-
-<div id="mascot-feedback" class="view-section active" style="padding-bottom: 0;">
-    <div class="mascot-area">
-        <div class="mascot" style="background:var(--pastel-green);">
-            <svg viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="#fff" />
-                <path d="M30,40 Q20,20 40,30" fill="#d4a373" />
-                <path d="M70,40 Q80,20 60,30" fill="#d4a373" />
-                <circle cx="35" cy="45" r="5" fill="#333" />
-                <circle cx="65" cy="45" r="5" fill="#333" />
-                <ellipse cx="50" cy="55" rx="8" ry="6" fill="#333" />
-                <path d="M45,65 Q50,75 55,65" stroke="#333" stroke-width="2" fill="none"/>
-            </svg>
-        </div>
-        <div class="speech-bubble" id="speech-text">
-            Hallo! Lass uns dein perfektes Zuhause finden.
-        </div>
-        <div class="mascot" style="background:var(--pastel-red);">
-             <svg viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="#fff" />
-                <path d="M25,25 L35,45 L45,25 Z" fill="#333" />
-                <path d="M55,25 L65,45 L75,25 Z" fill="#333" />
-                <path d="M30,30 Q50,90 70,30" fill="#333" />
-                <circle cx="40" cy="50" r="3" fill="#fff" />
-                <circle cx="60" cy="50" r="3" fill="#fff" />
-                <rect x="45" y="70" width="10" height="5" fill="#fff" />
-            </svg>
-        </div>
-    </div>
+<div class="shapes-container">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+    <div class="shape shape-4"></div>
 </div>
 
-<div id="view-list" class="view-section active">
-    
-    <div class="filter-bar">
-        <button class="btn-filter active" onclick="setFilter('all')">Alle</button>
-        <button class="btn-filter" onclick="setFilter('top')">🏆 Top</button>
-        <button class="btn-filter" onclick="setFilter('ok')">🤔 Naja</button>
-        <button class="btn-filter" onclick="setFilter('flop')">⛔️ K.O.</button>
-    </div>
+<div class="app-container">
+    <header>
+        <h1>🏡 FlatScore</h1>
+        <nav>
+            <button onclick="switchView('list')" class="btn-nav active" id="nav-list">Liste</button>
+            <button onclick="switchView('new')" class="btn-nav" id="nav-new">+ Neu</button>
+            <button onclick="switchView('config')" class="btn-nav" id="nav-config">Regeln</button>
+        </nav>
+    </header>
 
-    <div id="apartments-container"></div>
-    <div id="empty-state" style="text-align: center; color: #888; margin-top: 50px; display: none;">
-        Noch leer hier.<br>Tippe oben auf "+ Neu"!
-    </div>
-</div>
+    <div id="mascot-feedback" class="view-section active" style="padding-bottom: 0;">
+        <div class="mascot-stage">
+            
+            <div class="mascot-wrapper" onclick="mascotClick('bello')">
+                <div class="mascot dog">
+                    <svg viewBox="0 0 100 100">
+                        <path d="M15,35 Q5,55 20,65 T35,50" fill="#d4a373" stroke="#4a4a4a" stroke-width="2.5" stroke-linejoin="round"/>
+                        <path d="M85,35 Q95,55 80,65 T65,50" fill="#d4a373" stroke="#4a4a4a" stroke-width="2.5" stroke-linejoin="round"/>
+                        <circle cx="50" cy="50" r="42" fill="#fff9c4" stroke="#4a4a4a" stroke-width="3"/>
+                        <circle cx="35" cy="48" r="5" fill="#333"/>
+                        <circle cx="65" cy="48" r="5" fill="#333"/>
+                        <circle cx="37" cy="46" r="1.5" fill="white"/>
+                        <circle cx="67" cy="46" r="1.5" fill="white"/>
+                        <ellipse cx="50" cy="65" rx="16" ry="12" fill="white" />
+                        <path d="M44,60 Q50,56 56,60 Q50,68 44,60" fill="#333"/>
+                        <path d="M45,68 Q50,75 55,68" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="mascot-name">Bello</div>
+            </div>
 
-<div id="view-new" class="view-section">
-    <input type="hidden" id="edit-id" value="">
-    
-    <div id="form-header" style="text-align:center; margin-bottom:20px; color:#888; font-weight:bold;">
-        Neue Wohnung anlegen
-    </div>
+            <div class="speech-bubble">
+                <p id="speech-text">Tipp auf uns für gute Laune!</p>
+            </div>
 
-    <div class="form-section">
-        <h3>📍 Wo & Wie groß?</h3>
-        <div class="form-grid">
-            <div class="full-width">
-                <label>Link zum Inserat (Optional)</label>
-                <input type="url" id="f-link" placeholder="www.immowelt.de/...">
+            <div class="mascot-wrapper" onclick="mascotClick('cubi')">
+                <div class="mascot horse">
+                    <svg viewBox="0 0 100 100">
+                        <path d="M25,20 L35,40 L45,25 Z" fill="#8d6e63" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
+                        <path d="M75,20 L65,40 L55,25 Z" fill="#8d6e63" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
+
+                        <ellipse cx="50" cy="50" rx="42" ry="45" fill="#8d6e63" stroke="#5d4037" stroke-width="3"/>
+
+                        <ellipse cx="50" cy="72" rx="22" ry="18" fill="#d7ccc8" stroke="none"/>
+
+                        <path d="M35,15 Q50,0 65,15 Q70,25 60,30 Q50,35 40,30 Q30,25 35,15" fill="#5d4037" stroke="#3e2723" stroke-width="2" stroke-linejoin="round"/>
+
+                        <circle cx="35" cy="48" r="5" fill="#333"/>
+                        <circle cx="65" cy="48" r="5" fill="#333"/>
+                        <circle cx="37" cy="46" r="1.5" fill="white"/>
+                        <circle cx="67" cy="46" r="1.5" fill="white"/>
+                        
+                        <circle cx="43" cy="70" r="2.5" fill="#5d4037"/>
+                        <circle cx="57" cy="70" r="2.5" fill="#5d4037"/>
+                        
+                        <path d="M45,80 Q50,85 55,80" fill="none" stroke="#5d4037" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="mascot-name">Cubi</div>
             </div>
-            <div class="full-width">
-                <label>Straße & Hausnummer</label>
-                <input type="text" id="f-street" placeholder="Musterstraße 12">
-            </div>
-            <div>
-                <label>PLZ</label>
-                <input type="number" id="f-zip" placeholder="12345" pattern="\d*">
-            </div>
-            <div>
-                <label>Stadt</label>
-                <input type="text" id="f-city" placeholder="Berlin">
-            </div>
-            <div>
-                <label>Größe (m²)</label>
-                <input type="number" id="f-size" placeholder="65" pattern="\d*">
-            </div>
-            <div>
-                <label>Zimmer</label>
-                <input type="number" id="f-rooms" placeholder="2.5" step="0.5">
-            </div>
-            <div>
-                <label>Etage</label>
-                <input type="text" id="f-floor" placeholder="3. OG">
-            </div>
-            <div>
-                <label>Frei ab</label>
-                <input type="date" id="f-date" placeholder="sofort">
-            </div>
+
         </div>
     </div>
 
-    <div class="form-section" style="border-left: 4px solid var(--pastel-yellow-dark);">
-        <h3>💶 Die Kosten (Monatlich)</h3>
-        <div class="form-grid">
-            <div>
-                <label>Kaltmiete (€)</label>
-                <input type="number" id="f-cold" placeholder="800" pattern="\d*">
-            </div>
-            <div>
-                <label>Nebenkosten (€)</label>
-                <input type="number" id="f-nk" placeholder="150" pattern="\d*">
-            </div>
-            <div>
-                <label>Heizkosten (€)</label>
-                <input type="number" id="f-heat" placeholder="inkl." pattern="\d*">
-            </div>
-            <div>
-                <label><strong>Warmmiete (€)</strong></label>
-                <input type="number" id="f-warm" placeholder="950" style="font-weight:bold; background:#fffef0;" pattern="\d*">
-            </div>
-            <div class="full-width">
-                 <label>Kaution (Total €)</label>
-                 <input type="number" id="f-deposit" placeholder="2400" pattern="\d*">
-            </div>
+    <div id="view-list" class="view-section active">
+        <div class="filter-bar">
+            <button class="btn-filter active" onclick="setFilter('all')">Alle</button>
+            <button class="btn-filter" onclick="setFilter('top')">🏆 Top</button>
+            <button class="btn-filter" onclick="setFilter('ok')">🤔 Naja</button>
+            <button class="btn-filter" onclick="setFilter('flop')">⛔️ K.O.</button>
+        </div>
+        <div id="apartments-container"></div>
+        <div id="empty-state">
+            <div style="font-size: 3rem; margin-bottom:10px;">✨</div>
+            Deine Traumwohnung wartet.<br>Tippe auf <b>+ Neu</b>!
         </div>
     </div>
 
-    <div class="form-section">
-        <h3>📞 Kontakt & Infos</h3>
-        <div class="form-grid">
-            <div>
-                <label>Kontakt Name</label>
-                <input type="text" id="f-contact-name" placeholder="Hr. Müller">
-            </div>
-            <div>
-                <label>Telefon / Email</label>
-                <input type="text" id="f-contact-info" placeholder="017...">
-            </div>
-            <div class="full-width">
-                <label>Sonstige Notizen</label>
-                <textarea id="f-notes" rows="3" placeholder="Baujahr, Energieausweis, Gefühl..."></textarea>
+    <div id="view-new" class="view-section">
+        <input type="hidden" id="edit-id" value="">
+        
+        <div class="card-title">📝 Die Basics</div>
+        <div class="form-card glass-card">
+            <div class="form-grid">
+                <div class="full-width">
+                    <label>Link</label>
+                    <input type="url" id="f-link" placeholder="https://...">
+                </div>
+                <div class="full-width">
+                    <label>Adresse</label>
+                    <input type="text" id="f-street" placeholder="Straße & Nr.">
+                </div>
+                <div>
+                    <label>PLZ</label>
+                    <input type="number" id="f-zip" placeholder="12345" pattern="\d*">
+                </div>
+                <div>
+                    <label>Stadt</label>
+                    <input type="text" id="f-city" placeholder="Stadt">
+                </div>
+                <div>
+                    <label>Größe (m²)</label>
+                    <input type="number" id="f-size" placeholder="60" pattern="\d*">
+                </div>
+                <div>
+                    <label>Zimmer</label>
+                    <input type="number" id="f-rooms" placeholder="2.5" step="0.5">
+                </div>
+                <div>
+                    <label>Etage</label>
+                    <input type="text" id="f-floor" placeholder="EG">
+                </div>
+                <div>
+                    <label>Frei ab</label>
+                    <input type="date" id="f-date">
+                </div>
             </div>
         </div>
+
+        <div class="card-title">💶 Kosten</div>
+        <div class="form-card glass-card">
+            <div class="form-grid">
+                <div>
+                    <label>Kalt (€)</label>
+                    <input type="number" id="f-cold" placeholder="800">
+                </div>
+                <div>
+                    <label>NK (€)</label>
+                    <input type="number" id="f-nk" placeholder="150">
+                </div>
+                <div>
+                    <label>Heiz (€)</label>
+                    <input type="number" id="f-heat" placeholder="inkl.">
+                </div>
+                <div>
+                    <label class="highlight-label">Warm (€)</label>
+                    <input type="number" id="f-warm" placeholder="950" style="font-weight:bold; color:#6c5ce7;">
+                </div>
+                <div class="full-width">
+                     <label>Kaution (€)</label>
+                     <input type="number" id="f-deposit" placeholder="2400">
+                </div>
+            </div>
+        </div>
+
+        <div class="card-title">📞 Kontakt & Notiz</div>
+        <div class="form-card glass-card">
+            <div class="form-grid">
+                <div>
+                    <label>Name</label>
+                    <input type="text" id="f-contact-name" placeholder="Vermieter">
+                </div>
+                <div>
+                    <label>Kontakt</label>
+                    <input type="text" id="f-contact-info" placeholder="Tel/Mail">
+                </div>
+                <div class="full-width">
+                    <label>Notizen</label>
+                    <textarea id="f-notes" rows="2" placeholder="Was sagt dein Bauchgefühl?"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-title">🚥 Der Check</div>
+        <div id="evaluation-form"></div>
+
+        <button class="btn-action" onclick="calculateAndSave()">Speichern ✨</button>
+        <button onclick="cancelEdit()" class="btn-secondary">Abbrechen</button>
     </div>
 
-    <div id="evaluation-form"></div>
+    <div id="view-config" class="view-section">
+        <div class="form-card glass-card b-red">
+            <h3>🔴 No-Gos</h3>
+            <div class="input-row">
+                <input type="text" id="input-red" placeholder="z.B. Schimmel...">
+                <button onclick="addCriterion('red')" class="btn-icon">➕</button>
+            </div>
+            <ul id="list-red" class="config-list"></ul>
+        </div>
+        <div class="form-card glass-card b-yellow">
+            <h3>🟡 Kompromisse</h3>
+            <div class="input-row">
+                <input type="text" id="input-yellow" placeholder="z.B. Erdgeschoss...">
+                <button onclick="addCriterion('yellow')" class="btn-icon">➕</button>
+            </div>
+            <ul id="list-yellow" class="config-list"></ul>
+        </div>
+        <div class="form-card glass-card b-green">
+            <h3>🟢 Must-Haves</h3>
+            <div class="input-row">
+                <input type="text" id="input-green" placeholder="z.B. Balkon...">
+                <button onclick="addCriterion('green')" class="btn-icon">➕</button>
+            </div>
+            <ul id="list-green" class="config-list"></ul>
+        </div>
+        <button class="btn-test" onclick="loadTestData()">🎲 Demo-Daten laden</button>
+    </div>
 
-    <button class="btn-action" onclick="calculateAndSave()">Speichern & Auswerten</button>
-    <button onclick="cancelEdit()" class="btn-secondary">Abbrechen</button>
-</div>
-
-<div id="view-config" class="view-section">
-    <div class="speech-bubble">Hier definierst du die "weichen" Faktoren für das Ampel-System.</div>
-    <div class="form-section b-red">
-        <h3>🔴 Red Lights (Dealbreaker)</h3>
-        <div style="display:flex; gap:5px;">
-            <input type="text" id="input-red" placeholder="Neues Kriterium...">
-            <button onclick="addCriterion('red')" class="btn-add" style="background:var(--pastel-red-dark);">+</button>
-        </div>
-        <ul id="list-red" class="config-list"></ul>
-    </div>
-    <div class="form-section b-yellow">
-        <h3>🟡 Yellow Lights (Naja...)</h3>
-        <div style="display:flex; gap:5px;">
-            <input type="text" id="input-yellow" placeholder="Neues Kriterium...">
-            <button onclick="addCriterion('yellow')" class="btn-add" style="background:var(--pastel-yellow-dark); color:black;">+</button>
-        </div>
-        <ul id="list-yellow" class="config-list"></ul>
-    </div>
-    <div class="form-section b-green">
-        <h3>🟢 Green Lights (Super!)</h3>
-        <div style="display:flex; gap:5px;">
-            <input type="text" id="input-green" placeholder="Neues Kriterium...">
-            <button onclick="addCriterion('green')" class="btn-add" style="background:var(--pastel-green-dark);">+</button>
-        </div>
-        <ul id="list-green" class="config-list"></ul>
-    </div>
-    <button class="btn-test" onclick="loadTestData()">🛠️ 2 Test-Inserate laden</button>
 </div>
 
 <div id="delete-modal" class="modal-overlay">
     <div class="modal-box">
-        <h3>🗑️ Wirklich löschen?</h3>
-        <p>Nur diese eine Wohnung wird unwiderruflich gelöscht.</p>
+        <div style="font-size:3rem; margin-bottom:10px;">🗑️</div>
+        <h3>Wirklich löschen?</h3>
+        <p>Das kann nicht rückgängig gemacht werden.</p>
         <div class="modal-buttons">
-            <button onclick="closeModal()" class="btn-cancel">Abbrechen</button>
-            <button onclick="confirmDelete()" class="btn-confirm">Ja, weg damit</button>
+            <button onclick="closeModal()" class="btn-cancel">Behalten</button>
+            <button onclick="confirmDelete()" class="btn-confirm">Weg damit</button>
         </div>
     </div>
 </div>
