@@ -32,14 +32,18 @@ const phrases = {
     ]
 };
 
-// Helper: Unique ID
+// Helper: Unique ID Generator
 function generateId() { return Date.now() + Math.floor(Math.random() * 10000); }
 
 // Test Data
 const testDataTemplate = [
     {
-        facts: { street: "Sonnenallee 1", zip: "10115", city: "Berlin", size: "85", rooms: "3", floor: "4. OG", date: "2026-03-01", cold: "1200", warm: "1450", deposit: "3600", link: "", 
-        contactName: "Fr. Glück", contactPhone: "030 123456", contactEmail: "kontakt@wohnen.de", notes: "Traumwohnung! Hell, Dielenboden. Fühlt sich gut an." },
+        facts: { 
+            street: "Sonnenallee 1", zip: "10115", city: "Berlin", size: "85", rooms: "3", floor: "4. OG", date: "2026-03-01", 
+            cold: "1200", warm: "1450", deposit: "3600", link: "", 
+            contactName: "Fr. Glück", contactPhone: "030 123456", contactEmail: "kontakt@wohnen.de", 
+            notes: "Traumwohnung! Hell, Dielenboden. Fühlt sich gut an." 
+        },
         criteria: { red: [], yellow: [], green: ["Balkon / Terrasse", "Einbauküche inkl.", "Ruhige Lage", "Tageslichtbad"] },
         counts: { r: 0, y: 0, g: 4 }, 
         timestamp: new Date().toLocaleDateString()
@@ -216,12 +220,14 @@ function editApartment(id) {
     setMascotText("Bello: Wir polieren das Inserat auf!");
 
     const f = apt.facts;
+    // Map basic fields
     const mapping = ['street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'];
     mapping.forEach(key => {
         const el = document.getElementById('f-' + key);
         if(el) el.value = f[key] || "";
     });
-    // New Fields
+    
+    // Map Contact Fields (Safe Handling)
     document.getElementById('f-contact-name').value = f.contactName || "";
     document.getElementById('f-contact-phone').value = f.contactPhone || "";
     document.getElementById('f-contact-email').value = f.contactEmail || "";
@@ -260,9 +266,11 @@ function calculateAndSave() {
     const editId = document.getElementById('edit-id').value;
     const facts = {};
     const mapping = ['street', 'zip', 'city', 'size', 'rooms', 'floor', 'date', 'cold', 'warm', 'deposit', 'nk', 'heat', 'link', 'notes'];
+    
+    // Read Basic Inputs
     mapping.forEach(key => facts[key] = document.getElementById('f-' + key).value);
     
-    // Save New Fields
+    // Read Contact Inputs (Separate Fields)
     facts.contactName = document.getElementById('f-contact-name').value;
     facts.contactPhone = document.getElementById('f-contact-phone').value;
     facts.contactEmail = document.getElementById('f-contact-email').value;
@@ -367,9 +375,10 @@ function renderApartmentList() {
 
         const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(f.street + ' ' + f.zip + ' ' + f.city)}`;
         
+        // NOTES Display
         const notesHtml = f.notes ? `<div class="apt-notes"><strong>📝 Julias Notiz</strong>${f.notes}</div>` : '';
 
-        // NEW CONTACT DISPLAY
+        // CONTACT Display (With Mail & Phone)
         let contactHtml = '';
         if (f.contactName || f.contactPhone || f.contactEmail) {
             contactHtml = `
